@@ -8,25 +8,39 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.negativeion.ChartUI;
+import com.example.negativeion.IMovingChart;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.NegativeIonModel;
 import com.example.negativeion.R;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.listener.OnChartGestureListener;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class InfoFragment extends Fragment {
+public class InfoFragment extends Fragment
+                        implements OnChartValueSelectedListener, IMovingChart
+                        , OnChartGestureListener {
 
+    final String TAG = InfoFragment.class.getSimpleName();
     MysqlConnect mMysqlConnect;
     LineChart mLineChart;
+    TextView mTvShowData;
+
     private List<NegativeIonModel> mNegativeIonList;
 
     private Handler mHandler;
@@ -55,11 +69,18 @@ public class InfoFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        mTvShowData = getView().findViewById(R.id.tv_showData);
         mMysqlConnect = new MysqlConnect();
         mNegativeIonList = new ArrayList<>();
 
         mLineChart = getView().findViewById(R.id.chart_line);
+        mLineChart.setFocusable(true);
+        mLineChart.setOnChartValueSelectedListener(this);
+        mLineChart.setOnChartGestureListener(this);
+
+        mLineChart.getOnTouchListener().getLastGesture();
         ChartUI.mpLineChart(mLineChart, null);
+        ChartUI.init(this);
 
         mHandler = new Handler();
         initRunnable();
@@ -98,12 +119,85 @@ public class InfoFragment extends Fragment {
                 mLineChart.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        String value = mNegativeIonList.
+                                get(mNegativeIonList.size()-1).getTemperatureValue();
+                        mTvShowData.setText(value);
                        mLineChart.invalidate();//要在原生Thread才能使用
                     }
                 }, 500);
 
             }
         };
+    }
+
+    @Override
+    public void onValueSelected(Entry e, Highlight h) {
+        mTvShowData.setText(""+e.getY());
+
+        mLineChart.getData().getDataSetByIndex(0).removeLast();
+        Log.d(TAG, "onValueSelected:" + e.getX() + e.getY());
+        Log.d(TAG, "onValueSelected:" + h.toString());
+
+        mLineChart.getData().getDataSetByIndex(0).addEntry(e);
+    }
+
+    @Override
+    public void onNothingSelected() {
+
+    }
+
+    @Override
+    public void MovingPoint() {
+        Entry e = mLineChart.getData().getDataSetByIndex(1).getEntryForIndex(
+                (int)mLineChart.getData().getDataSetByIndex(0).getEntryForIndex(0).getX()
+        );
+        mTvShowData.setText(""+e.getY());
+        mLineChart.getData().getDataSetByIndex(0).removeLast();
+
+        mLineChart.getData().getDataSetByIndex(0).addEntry(e);
+
+    }
+
+    @Override
+    public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+        Log.d(TAG, "onChartGestureStart");
+    }
+
+    @Override
+    public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+        Log.d(TAG, "onChartGestureEnd");
+    }
+
+    @Override
+    public void onChartLongPressed(MotionEvent me) {
+        Log.d(TAG, "onChartLongPressed");
+    }
+
+    @Override
+    public void onChartDoubleTapped(MotionEvent me) {
+        Log.d(TAG, "onChartDoubleTapped");
+    }
+
+    @Override
+    public void onChartSingleTapped(MotionEvent me) {
+        Log.d(TAG, "onChartSingleTapped");
+    }
+
+    @Override
+    public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+        Log.d(TAG, "onChartFling");
+    }
+
+    @Override
+    public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+        Log.d(TAG, "onChartScale");
+    }
+
+    @Override
+    public void onChartTranslate(MotionEvent me, float dX, float dY) {
+        //Log.d(TAG, "onChartTranslate X:" + dX + " Y:" + dY);
+        //Log.d(TAG, "onChartTranslate X:" + me.getX() + " Y:" + me.getY() );
+        //Toast.makeText(getContext(), "X:" + dX + " Y:" + dY, Toast.LENGTH_SHORT).show();
     }
 
     /**

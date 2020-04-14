@@ -16,6 +16,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
@@ -26,9 +27,12 @@ public class ChartUI {
 
     private final static String TAG = ChartUI.class.getSimpleName();
     private List<NegativeIonModel> mNegativeIonList;
-
+    private static IMovingChart iMovingChart;
     static String mTimeStr[];
 
+    public static void init(IMovingChart iMovingChart1){
+        iMovingChart = iMovingChart1;
+    }
     //MP Bar Chart
     public static void mpBarChart(BarChart barChart, float time, float value) {
         BarData barData = barChart.getData(); //範型 Template
@@ -58,26 +62,41 @@ public class ChartUI {
         return barDataSet;
     }
 
-    public static void mpLineChart(LineChart lineChart, List<NegativeIonModel> negativeIonList)
+    public static void mpLineChart(final LineChart lineChart, List<NegativeIonModel> negativeIonList)
     {
         LineData lineData = lineChart.getData();
         if(lineData == null) {
             lineData = new LineData();
             lineChart.setData(lineData);
             lineChart.setTouchEnabled(true);
+
+            lineChart.getAxisRight().setDrawLabels(false);
+            //lineChart.setVisibleXRangeMaximum(70);
         }
         else{
-            ILineDataSet iLineDataSet = lineData.getDataSetByIndex(0);
+            ILineDataSet iLineDataSet1;
+            iLineDataSet1 = createEmptyLineDataSet();
+            lineData.addDataSet(iLineDataSet1); //for draw one point circle
+
+            ILineDataSet iLineDataSet = lineData.getDataSetByIndex(1);
             if(iLineDataSet == null){
                 iLineDataSet = createLineDataSet(negativeIonList);
                 lineData.addDataSet(iLineDataSet);
+
+                iLineDataSet1.addEntry(iLineDataSet.getEntryForIndex(iLineDataSet.getEntryCount()-1));
                 XAxis xAxis = lineChart.getXAxis();
+
+                xAxis.setAvoidFirstLastClipping(true);
+
+                xAxis.setAxisMaximum(240);
 
                 xAxis.setValueFormatter(new ValueFormatter() {
                     @Override
                     public String getFormattedValue(float value) {
-                        System.out.println(value);
-
+                        if((int)value >= mTimeStr.length)
+                            return "";
+                        System.out.println(value + "chart getX:" );
+                        //iMovingChart.MovingPoint();
                         return mTimeStr[(int)value];
                     }
                 });
@@ -86,12 +105,18 @@ public class ChartUI {
 
                 //lineChart.setMaxVisibleValueCount(9);
             }
-
+            //lineChart.highlightValue(new Highlight(30f,0),true);
             lineData.notifyDataChanged();
             lineChart.notifyDataSetChanged();
             //lineChart.moveViewToX(lineChart.getX());
 
         }
+    }
+    private static LineDataSet createEmptyLineDataSet(){
+        LineDataSet set = new LineDataSet(new ArrayList<Entry>(), "" );
+        set.setCircleColor(Color.rgb(240, 238, 70));
+        set.setCircleRadius(5f);
+        return set;
     }
 
     private static LineDataSet createLineDataSet(List<NegativeIonModel> negativeIonList) {
@@ -125,8 +150,11 @@ public class ChartUI {
         set.setCircleColor(Color.rgb(240, 238, 70));
         set.setCircleRadius(5f);
         set.setFillColor(Color.rgb(240, 238, 70));
-        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        set.setDrawValues(true);
+        set.setMode(LineDataSet.Mode.LINEAR);
+        set.setDrawCircles(false);
+        //set.setDrawCircleHole(true);
+
+        set.setDrawValues(false);
         set.setValueTextSize(10f);
         set.setValueTextColor(Color.BLUE);
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
