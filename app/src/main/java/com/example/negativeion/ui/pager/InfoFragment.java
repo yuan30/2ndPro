@@ -21,6 +21,7 @@ import com.example.negativeion.IMovingChart;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.NegativeIonModel;
 import com.example.negativeion.R;
+import com.example.negativeion.TemperatureModel;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -42,7 +43,7 @@ public class InfoFragment extends Fragment
     TextView mTvShowData;
 
     private List<NegativeIonModel> mNegativeIonList;
-
+    private List<TemperatureModel> mTemperatureModelList;
     private Handler mHandler;
     private Runnable CONNRunable;
 
@@ -72,6 +73,7 @@ public class InfoFragment extends Fragment
         mTvShowData = getView().findViewById(R.id.tv_showData);
         mMysqlConnect = new MysqlConnect();
         mNegativeIonList = new ArrayList<>();
+        mTemperatureModelList = new ArrayList<>();
 
         mLineChart = getView().findViewById(R.id.chart_line);
         mLineChart.setFocusable(true);
@@ -113,7 +115,7 @@ public class InfoFragment extends Fragment
                         }
                     });*///Toast.makeText(getActivity(), "資料讀取失敗", Toast.LENGTH_SHORT).show();
                     return;
-                }
+                }/*
                 mNegativeIonList.addAll(mMysqlConnect.getNegativeIonModelList());
                 ChartUI.mpLineChart(mLineChart, mNegativeIonList);
                 mLineChart.postDelayed(new Runnable() {
@@ -124,8 +126,18 @@ public class InfoFragment extends Fragment
                         mTvShowData.setText(value);
                        mLineChart.invalidate();//要在原生Thread才能使用
                     }
+                }, 500);*/
+                mTemperatureModelList.addAll(mMysqlConnect.getTemperatureModelList());
+                ChartUI.mpLineChart(mLineChart, mTemperatureModelList);
+                mLineChart.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        String value = mTemperatureModelList.
+                                get(mTemperatureModelList.size()-1).getTemperatureValue();
+                        mTvShowData.setText(value);
+                        mLineChart.invalidate();//要在原生Thread才能使用
+                    }
                 }, 500);
-
             }
         };
     }

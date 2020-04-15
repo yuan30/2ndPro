@@ -62,7 +62,7 @@ public class ChartUI {
         return barDataSet;
     }
 
-    public static void mpLineChart(final LineChart lineChart, List<NegativeIonModel> negativeIonList)
+    public static void mpLineChart(final LineChart lineChart, List<TemperatureModel> temperatureModelList)
     {
         LineData lineData = lineChart.getData();
         if(lineData == null) {
@@ -80,15 +80,27 @@ public class ChartUI {
 
             ILineDataSet iLineDataSet = lineData.getDataSetByIndex(1);
             if(iLineDataSet == null){
-                iLineDataSet = createLineDataSet(negativeIonList);
+                int length=0;
+                for(TemperatureModel temperatureModel : temperatureModelList) {
+                    if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
+                        length++;
+                    }
+                }int i=0;
+                for(TemperatureModel temperatureModel : temperatureModelList) {
+                    if (temperatureModel.getTimeValue().substring(5, 7).compareTo("04") >= 0 && Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
+                        mTimeStr[i] = temperatureModel.getTimeValue().substring(11);
+                    }
+                }
+                mTimeStr = new String[length];
+                iLineDataSet = createLineDataSet(temperatureModelList);
                 lineData.addDataSet(iLineDataSet);
 
-                iLineDataSet1.addEntry(iLineDataSet.getEntryForIndex(iLineDataSet.getEntryCount()-1));
+                //iLineDataSet1.addEntry(iLineDataSet.getEntryForIndex(iLineDataSet.getEntryCount()-1));
                 XAxis xAxis = lineChart.getXAxis();
 
                 xAxis.setAvoidFirstLastClipping(true);
 
-                xAxis.setAxisMaximum(240);
+                //xAxis.setAxisMaximum(240);
 
                 xAxis.setValueFormatter(new ValueFormatter() {
                     @Override
@@ -119,29 +131,29 @@ public class ChartUI {
         return set;
     }
 
-    private static LineDataSet createLineDataSet(List<NegativeIonModel> negativeIonList) {
+    private static LineDataSet createLineDataSet(List<TemperatureModel> temperatureModelList) {
 
         ArrayList<Entry> entries = new ArrayList<>();
         int length = 0;
-        for(NegativeIonModel negativeIonModel : negativeIonList) {
-            if(negativeIonModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(negativeIonModel.getTemperatureValue()) != 0) {
+        for(TemperatureModel temperatureModel : temperatureModelList) {
+            if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
                 length++;
             }
         }
         mTimeStr = new String[length];
         System.out.println(length);
         int i=0;
-        for(NegativeIonModel negativeIonModel : negativeIonList){
-            if(negativeIonModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(negativeIonModel.getTemperatureValue()) != 0) {
-                mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
+        for(TemperatureModel temperatureModel : temperatureModelList){
+            if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
+                mTimeStr[i] = temperatureModel.getTimeValue().substring(11);
 
 
-                Log.d(TAG, negativeIonModel.getTimeValue());
-                entries.add(new Entry(i//Float.valueOf(negativeIonModel.getTimeValue().substring(14).replace(':', '.'))
-                        , Float.valueOf(negativeIonModel.getTemperatureValue())));
+                Log.d(TAG, temperatureModel.getTimeValue());
+                entries.add(new Entry(i//Float.valueOf(temperatureModel.getTimeValue().substring(14).replace(':', '.'))
+                        , Float.valueOf(temperatureModel.getTemperatureValue())));
                 i++;
             }/*else
-                Log.d(TAG, negativeIonModel.getTimeValue().substring(5,7).compareTo("03") + "");*/
+                Log.d(TAG, temperatureModel.getTimeValue().substring(5,7).compareTo("03") + "");*/
         }//mTimeStr[i] = "\n";
 
         LineDataSet set = new LineDataSet(entries, "Line DataSet:2020-04-07" );
@@ -161,4 +173,48 @@ public class ChartUI {
 
         return set;
     }
+
+/*
+    private static LineDataSet createLineDataSet(List<TemperatureModel> temperatureModelList) {
+
+        ArrayList<Entry> entries = new ArrayList<>();
+        int length = 0;
+        for(TemperatureModel temperatureModel : temperatureModelList) {
+            if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
+                length++;
+            }
+        }
+        mTimeStr = new String[length];
+        System.out.println(length);
+        int i=0;
+        for(TemperatureModel temperatureModel : temperatureModelList){
+            if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
+                mTimeStr[i] = temperatureModel.getTimeValue().substring(11);
+
+
+                Log.d(TAG, temperatureModel.getTimeValue());
+                entries.add(new Entry(i//Float.valueOf(temperatureModel.getTimeValue().substring(14).replace(':', '.'))
+                        , Float.valueOf(temperatureModel.getTemperatureValue())));
+                i++;
+            }/*else
+                Log.d(TAG, temperatureModel.getTimeValue().substring(5,7).compareTo("03") + "");
+        }//mTimeStr[i] = "\n";
+
+        LineDataSet set = new LineDataSet(entries, "Line DataSet:2020-04-07" );
+        set.setColor(Color.rgb(240, 238, 70));
+        set.setLineWidth(2.5f);
+        set.setCircleColor(Color.rgb(240, 238, 70));
+        set.setCircleRadius(5f);
+        set.setFillColor(Color.rgb(240, 238, 70));
+        set.setMode(LineDataSet.Mode.LINEAR);
+        set.setDrawCircles(false);
+        //set.setDrawCircleHole(true);
+
+        set.setDrawValues(false);
+        set.setValueTextSize(10f);
+        set.setValueTextColor(Color.BLUE);
+        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+
+        return set;
+    }*/
 }

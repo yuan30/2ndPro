@@ -30,7 +30,7 @@ public class MysqlConnect {
     private String resStr = "";
 
     private List<NegativeIonModel> topicDatas = null;
-
+    private List<TemperatureModel> topicTemperatureDatas = null;
     //OkHttpClient client;
 
     public MysqlConnect(){
@@ -60,6 +60,35 @@ public class MysqlConnect {
                         + "\n溫度:" + negativeIonModel.getTemperatureValue() + " 濕度:" + negativeIonModel.getHumidityValue()
                         + "\n時間:" + negativeIonModel.getTimeValue() +"\n\n\n";
             }
+            //resStr = response.body().string();
+        }catch (IOException e){e.printStackTrace();resStr = e.getMessage();}
+        catch (JsonSyntaxException e){e.printStackTrace();resStr = e.getMessage() + "\n Json語法有誤，Gson轉失敗";}
+        catch (Exception e){e.printStackTrace();resStr = e.getMessage();}
+
+    }
+
+    public void connectTemperature(){ //連上getData1.php，拿到頁面上的資料表的資料
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
+        Request request = new Request.Builder()
+                .url("http://www.usblab.nctu.me/40643230test/php/getTEMP.php")
+                .method("GET", null)//, RequestBody.create(resBodyStr))
+                .build();
+
+        try{
+            Response response = client.newCall(request).execute();
+            Gson gson = new Gson();
+            topicTemperatureDatas = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
+                    , new TypeToken<List<TemperatureModel>>(){ }.getType());
+            /*for(TemperatureModel temperatureModel : topicTemperatureDatas){
+                resStr += "\n溫度:" + TemperatureModel.getTemperatureValue()
+                        + "\n時間:" + TemperatureModel.getTimeValue() +"\n\n\n";
+            }*/
             //resStr = response.body().string();
         }catch (IOException e){e.printStackTrace();resStr = e.getMessage();}
         catch (JsonSyntaxException e){e.printStackTrace();resStr = e.getMessage() + "\n Json語法有誤，Gson轉失敗";}
@@ -107,6 +136,7 @@ public class MysqlConnect {
 
     public List<NegativeIonModel> getNegativeIonModelList(){return topicDatas;}
 
+    public List<TemperatureModel> getTemperatureModelList(){return topicTemperatureDatas;}
     public void testSendData(){
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
