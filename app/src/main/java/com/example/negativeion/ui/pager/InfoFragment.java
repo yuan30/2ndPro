@@ -1,6 +1,5 @@
 package com.example.negativeion.ui.pager;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -13,15 +12,15 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.negativeion.ChartUI;
 import com.example.negativeion.IMovingChart;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.NegativeIonModel;
 import com.example.negativeion.R;
-import com.example.negativeion.TemperatureModel;
+import com.example.negativeion.Temperature2Model;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -41,9 +40,10 @@ public class InfoFragment extends Fragment
     MysqlConnect mMysqlConnect;
     LineChart mLineChart;
     TextView mTvShowData;
+    TextView mTvTestSQL;
 
     private List<NegativeIonModel> mNegativeIonList;
-    private List<TemperatureModel> mTemperatureModelList;
+    private List<Temperature2Model> mTemperature2ModelList;
     private Handler mHandler;
     private Runnable CONNRunable;
 
@@ -63,17 +63,73 @@ public class InfoFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_info, container, false);
+        View view = inflater.inflate(R.layout.fragment_info, container, false);
+        Button button0 =  view.findViewById(R.id.btn_2tem);
+        Button button1 =  view.findViewById(R.id.btn_tem);
+        Button button2 =  view.findViewById(R.id.btn_hum);
+        Button button3 =  view.findViewById(R.id.btn_neg);
+        Button button4 =  view.findViewById(R.id.btn_pm25);
+        button0.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                initRunnable2Tem();
+                new Thread(CONNRunable).start();
+            }
+        });
+        button1.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                MysqlConnect.setIndex(1);
+                initRunnable();
+                new Thread(CONNRunable).start();
+            }
+        });
+        button2.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                MysqlConnect.setIndex(2);
+                initRunnable();
+                new Thread(CONNRunable).start();
+            }
+        });
+        button3.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                MysqlConnect.setIndex(3);
+                initRunnable();
+                new Thread(CONNRunable).start();
+            }
+        });
+        button4.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                MysqlConnect.setIndex(4);
+                initRunnable();
+                new Thread(CONNRunable).start();
+            }
+        });
+        return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        mTvTestSQL = getView().findViewById(R.id.tv_testSQL);
         mTvShowData = getView().findViewById(R.id.tv_showData);
         mMysqlConnect = new MysqlConnect();
         mNegativeIonList = new ArrayList<>();
-        mTemperatureModelList = new ArrayList<>();
+        mTemperature2ModelList = new ArrayList<>();
 
         mLineChart = getView().findViewById(R.id.chart_line);
         mLineChart.setFocusable(true);
@@ -85,7 +141,7 @@ public class InfoFragment extends Fragment
         ChartUI.init(this);
 
         mHandler = new Handler();
-        initRunnable();
+        //initRunnable();
     }
 
     @Override
@@ -127,13 +183,28 @@ public class InfoFragment extends Fragment
                        mLineChart.invalidate();//要在原生Thread才能使用
                     }
                 }, 500);*/
-                mTemperatureModelList.addAll(mMysqlConnect.getTemperatureModelList());
-                ChartUI.mpLineChart(mLineChart, mTemperatureModelList);
+
+            }
+        };
+    }
+    private void initRunnable2Tem() {
+        CONNRunable = new Runnable() {
+            @Override
+            public void run() {
+                mMysqlConnect.connectTemperature(); //NetworkOnMainThreadException 要新開Thread
+
+                if(mMysqlConnect.getTemperatureModelList() == null) {
+                    return;
+                }
+
+                mTemperature2ModelList.addAll(mMysqlConnect.getTemperatureModelList());
+
+                ChartUI.mpLineChart(mLineChart, mTemperature2ModelList);
                 mLineChart.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        String value = mTemperatureModelList.
-                                get(mTemperatureModelList.size()-1).getTemperatureValue();
+                        String value = mTemperature2ModelList.
+                                get(mTemperature2ModelList.size()-1).getTemperatureValue();
                         mTvShowData.setText(value);
                         mLineChart.invalidate();//要在原生Thread才能使用
                     }

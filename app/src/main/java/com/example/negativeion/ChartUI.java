@@ -3,10 +3,8 @@ package com.example.negativeion;
 import android.graphics.Color;
 import android.util.Log;
 
-import com.example.negativeion.NegativeIonModel;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -16,11 +14,11 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class ChartUI {
@@ -62,7 +60,7 @@ public class ChartUI {
         return barDataSet;
     }
 
-    public static void mpLineChart(final LineChart lineChart, List<TemperatureModel> temperatureModelList)
+    public static void mpLineChart(final LineChart lineChart, List<Temperature2Model> temperature2ModelList)
     {
         LineData lineData = lineChart.getData();
         if(lineData == null) {
@@ -78,50 +76,57 @@ public class ChartUI {
             iLineDataSet1 = createEmptyLineDataSet();
             lineData.addDataSet(iLineDataSet1); //for draw one point circle
 
-            ILineDataSet iLineDataSet = lineData.getDataSetByIndex(1);
-            if(iLineDataSet == null){
-                int length=0;
-                for(TemperatureModel temperatureModel : temperatureModelList) {
-                    if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
-                        length++;
-                    }
-                }int i=0;
-                for(TemperatureModel temperatureModel : temperatureModelList) {
-                    if (temperatureModel.getTimeValue().substring(5, 7).compareTo("04") >= 0 && Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
-                        mTimeStr[i] = temperatureModel.getTimeValue().substring(11);
-                    }
+            int length=0;
+            for(Temperature2Model temperature2Model : temperature2ModelList) {
+                if(Float.valueOf(temperature2Model.getTemperatureValue()) != 0) {
+                    length++;
                 }
-                mTimeStr = new String[length];
-                iLineDataSet = createLineDataSet(temperatureModelList);
-                lineData.addDataSet(iLineDataSet);
-
-                //iLineDataSet1.addEntry(iLineDataSet.getEntryForIndex(iLineDataSet.getEntryCount()-1));
-                XAxis xAxis = lineChart.getXAxis();
-
-                xAxis.setAvoidFirstLastClipping(true);
-
-                //xAxis.setAxisMaximum(240);
-
-                xAxis.setValueFormatter(new ValueFormatter() {
-                    @Override
-                    public String getFormattedValue(float value) {
-                        if((int)value >= mTimeStr.length)
-                            return "";
-                        System.out.println(value + "chart getX:" );
-                        //iMovingChart.MovingPoint();
-                        return mTimeStr[(int)value];
-                    }
-                });
-                xAxis.setLabelRotationAngle(-45);
-                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-
-                //lineChart.setMaxVisibleValueCount(9);
+            }int i=0;   mTimeStr = new String[length];
+            for(Temperature2Model temperature2Model : temperature2ModelList) {
+                if (Float.valueOf(temperature2Model.getTemperatureValue()) != 0) {
+                    mTimeStr[i] = temperature2Model.getTimeValue().substring(11);
+                }
+                i++;
             }
+
+
+
+            HashSet hashSet = new HashSet();
+            for (Temperature2Model temperature2Model : temperature2ModelList) {
+                //Log.d(TAG, temperature2Model.getTId());
+                hashSet.add(temperature2Model.getTId());
+                Log.d(TAG, "比對"+ temperature2Model.getTId().equals(String.valueOf(0)) + " ");
+            }Log.d(TAG, hashSet.size()+"雜湊長度");
+            Log.d(TAG, length+"");
+            for(int j = 0; j<hashSet.size(); j++){
+                ILineDataSet iLineDataSet = lineData.getDataSetByIndex(j+1);
+                if(iLineDataSet == null){
+                    iLineDataSet = createLineDataSet(temperature2ModelList, j);
+                    lineData.addDataSet(iLineDataSet);
+                }
+            }
+            //ILineDataSet iLineDataSet = lineData.getDataSetByIndex(1);
+
+            XAxis xAxis = lineChart.getXAxis();
+            xAxis.setAvoidFirstLastClipping(true);
+            //xAxis.setAxisMaximum(240);
+            xAxis.setValueFormatter(new ValueFormatter() {
+                @Override
+                public String getFormattedValue(float value) {
+                    if((int)value >= mTimeStr.length)
+                        return "";
+                    System.out.println(value + "chart getX:" );
+                    //iMovingChart.MovingPoint();
+                    return mTimeStr[(int)value];
+                }
+            });
+            xAxis.setLabelRotationAngle(-45);
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            //lineChart.setMaxVisibleValueCount(9);
             //lineChart.highlightValue(new Highlight(30f,0),true);
             lineData.notifyDataChanged();
             lineChart.notifyDataSetChanged();
             //lineChart.moveViewToX(lineChart.getX());
-
         }
     }
     private static LineDataSet createEmptyLineDataSet(){
@@ -131,33 +136,28 @@ public class ChartUI {
         return set;
     }
 
-    private static LineDataSet createLineDataSet(List<TemperatureModel> temperatureModelList) {
+    private static LineDataSet createLineDataSet(List<Temperature2Model> temperature2ModelList, int index) {
 
         ArrayList<Entry> entries = new ArrayList<>();
-        int length = 0;
-        for(TemperatureModel temperatureModel : temperatureModelList) {
-            if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
-                length++;
-            }
-        }
-        mTimeStr = new String[length];
-        System.out.println(length);
+
         int i=0;
-        for(TemperatureModel temperatureModel : temperatureModelList){
-            if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
-                mTimeStr[i] = temperatureModel.getTimeValue().substring(11);
+        for(Temperature2Model temperature2Model : temperature2ModelList){
+            if(temperature2Model.getTimeValue().substring(5,7).compareTo("04") >= 0 && temperature2Model.getTId().equals(String.valueOf(index))) {
 
 
-                Log.d(TAG, temperatureModel.getTimeValue());
-                entries.add(new Entry(i//Float.valueOf(temperatureModel.getTimeValue().substring(14).replace(':', '.'))
-                        , Float.valueOf(temperatureModel.getTemperatureValue())));
+                //Log.d(TAG, temperature2Model.getTimeValue() + index);
+                entries.add(new Entry(i//Float.valueOf(temperature2Model.getTimeValue().substring(14).replace(':', '.'))
+                        , Float.valueOf(temperature2Model.getTemperatureValue())));
                 i++;
             }/*else
-                Log.d(TAG, temperatureModel.getTimeValue().substring(5,7).compareTo("03") + "");*/
+                Log.d(TAG, temperature2Model.getTimeValue().substring(5,7).compareTo("03") + "");*/
         }//mTimeStr[i] = "\n";
 
-        LineDataSet set = new LineDataSet(entries, "Line DataSet:2020-04-07" );
-        set.setColor(Color.rgb(240, 238, 70));
+        LineDataSet set = new LineDataSet(entries, "Line DataSet:" + temperature2ModelList.get(0).getTimeValue().substring(0,10)  );
+        if(index == 0)
+            set.setColor(Color.rgb(240, 238, 70));
+        else
+            set.setColor(Color.rgb(240, 100, 100));
         set.setLineWidth(2.5f);
         set.setCircleColor(Color.rgb(240, 238, 70));
         set.setCircleRadius(5f);
@@ -175,11 +175,11 @@ public class ChartUI {
     }
 
 /*
-    private static LineDataSet createLineDataSet(List<TemperatureModel> temperatureModelList) {
+    private static LineDataSet createLineDataSet(List<Temperature2Model> temperatureModelList) {
 
         ArrayList<Entry> entries = new ArrayList<>();
         int length = 0;
-        for(TemperatureModel temperatureModel : temperatureModelList) {
+        for(Temperature2Model temperatureModel : temperatureModelList) {
             if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
                 length++;
             }
@@ -187,7 +187,7 @@ public class ChartUI {
         mTimeStr = new String[length];
         System.out.println(length);
         int i=0;
-        for(TemperatureModel temperatureModel : temperatureModelList){
+        for(Temperature2Model temperatureModel : temperatureModelList){
             if(temperatureModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(temperatureModel.getTemperatureValue()) != 0) {
                 mTimeStr[i] = temperatureModel.getTimeValue().substring(11);
 

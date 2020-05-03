@@ -1,17 +1,13 @@
 package com.example.negativeion;
 
-import android.util.Log;
-
+import com.example.negativeion.model.HumidityModel;
+import com.example.negativeion.model.TemperatureModel;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import okhttp3.FormBody;
@@ -29,15 +25,27 @@ public class MysqlConnect {
     private String mysql_password = "usblab603";
     private String resStr = "";
 
+    private static int index;
+    private static String time = null;
+
     private List<NegativeIonModel> topicDatas = null;
-    private List<TemperatureModel> topicTemperatureDatas = null;
+    private List<Temperature2Model> topicTemperatureDatas = null;
     //OkHttpClient client;
 
     public MysqlConnect(){
 
     }
 
+    public static void setIndex(int index) {
+        MysqlConnect.index = index;
+    }
+
+    public static void setTime(String time) {
+        MysqlConnect.time = time;
+    }
+
     public void CONN(){ //連上getData1.php，拿到頁面上的資料表的資料
+        resStr = "";
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -46,25 +54,36 @@ public class MysqlConnect {
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://www.usblab.nctu.me/40643230test/php/getData1.php")
+                .url("http://www.usblab.nctu.me/40643230test/php/getDataV2.php?index=" + index + "&time=" + time)
                 .method("GET", null)//, RequestBody.create(resBodyStr))
                 .build();
 
         try{
             Response response = client.newCall(request).execute();
             Gson gson = new Gson();
+            Type type = null;
+
+            type = new TypeToken<List<NegativeIonModel>>(){ }.getType();
             topicDatas = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
-                    , new TypeToken<List<NegativeIonModel>>(){ }.getType());
-            for(NegativeIonModel negativeIonModel : topicDatas){
-                resStr += "負離子:" + negativeIonModel.getNegativeIonValue() + " PM2.5:" + negativeIonModel.getPm25Value()
-                        + "\n溫度:" + negativeIonModel.getTemperatureValue() + " 濕度:" + negativeIonModel.getHumidityValue()
-                        + "\n時間:" + negativeIonModel.getTimeValue() +"\n\n\n";
-            }
+                    , type);
+            if(index == 1)
+                for(NegativeIonModel negativeIonModel : topicDatas)
+                    resStr += "溫度:" + negativeIonModel.getTemperatureValue() + " 時間:" + negativeIonModel.getTimeValue() +"\n\n";
+            else if(index == 2)
+                for(NegativeIonModel negativeIonModel : topicDatas)
+                    resStr += "濕度:" + negativeIonModel.getHumidityValue() + " 時間:" + negativeIonModel.getTimeValue() +"\n\n";
+            else if(index == 3)
+                for(NegativeIonModel negativeIonModel : topicDatas)
+                    resStr += "負離子:" + negativeIonModel.getNegativeIonValue() + " 時間:" + negativeIonModel.getTimeValue() +"\n\n";
+            else if(index == 4)
+                for(NegativeIonModel negativeIonModel : topicDatas)
+                    resStr += " PM2.5:" + negativeIonModel.getPm25Value() + " 時間:" + negativeIonModel.getTimeValue() +"\n\n";
             //resStr = response.body().string();
         }catch (IOException e){e.printStackTrace();resStr = e.getMessage();}
         catch (JsonSyntaxException e){e.printStackTrace();resStr = e.getMessage() + "\n Json語法有誤，Gson轉失敗";}
         catch (Exception e){e.printStackTrace();resStr = e.getMessage();}
 
+        time = null;
     }
 
     public void connectTemperature(){ //連上getData1.php，拿到頁面上的資料表的資料
@@ -76,7 +95,7 @@ public class MysqlConnect {
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://www.usblab.nctu.me/40643230test/php/getTEMP.php")
+                .url("http://www.usblab.nctu.me/40643230test/php/getTEMP.php?index=0")
                 .method("GET", null)//, RequestBody.create(resBodyStr))
                 .build();
 
@@ -84,10 +103,10 @@ public class MysqlConnect {
             Response response = client.newCall(request).execute();
             Gson gson = new Gson();
             topicTemperatureDatas = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
-                    , new TypeToken<List<TemperatureModel>>(){ }.getType());
-            /*for(TemperatureModel temperatureModel : topicTemperatureDatas){
-                resStr += "\n溫度:" + TemperatureModel.getTemperatureValue()
-                        + "\n時間:" + TemperatureModel.getTimeValue() +"\n\n\n";
+                    , new TypeToken<List<Temperature2Model>>(){ }.getType());
+            /*for(Temperature2Model temperatureModel : topicTemperatureDatas){
+                resStr += "\n溫度:" + Temperature2Model.getTemperatureValue()
+                        + "\n時間:" + Temperature2Model.getTimeValue() +"\n\n\n";
             }*/
             //resStr = response.body().string();
         }catch (IOException e){e.printStackTrace();resStr = e.getMessage();}
@@ -96,7 +115,7 @@ public class MysqlConnect {
 
     }
 
-    public void sendData(){//NegativeIonModel negativeIonModel 之後由這送電源開跟關去資料庫1
+    public void sendData(){//HumidityModel negativeIonModel 之後由這送電源開跟關去資料庫1
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -136,7 +155,7 @@ public class MysqlConnect {
 
     public List<NegativeIonModel> getNegativeIonModelList(){return topicDatas;}
 
-    public List<TemperatureModel> getTemperatureModelList(){return topicTemperatureDatas;}
+    public List<Temperature2Model> getTemperatureModelList(){return topicTemperatureDatas;}
     public void testSendData(){
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();

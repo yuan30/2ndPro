@@ -5,19 +5,19 @@ import com.google.gson.annotations.SerializedName;
 public class NegativeIonModel {
 
     @SerializedName("NegativeIon")
-    private String negativeIonValue;
+    private String negativeIonValue = null;
 
     @SerializedName("PM25")
-    private String pm25Value;
+    private String pm25Value = null;
 
     @SerializedName("Temperature")
-    private String temperatureValue;
+    private String temperatureValue = null;
 
     @SerializedName("Humidity")
-    private String humidityValue;
+    private String humidityValue = null;
 
     @SerializedName("Time")
-    private String timeValue;
+    private String timeValue = null;
 
     public String getNegativeIonValue() {
         return negativeIonValue;

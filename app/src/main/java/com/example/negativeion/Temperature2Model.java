@@ -2,7 +2,7 @@ package com.example.negativeion;
 
 import com.google.gson.annotations.SerializedName;
 
-public class TemperatureModel {
+public class Temperature2Model {
 
     @SerializedName("temperature")
     private String temperatureValue;
