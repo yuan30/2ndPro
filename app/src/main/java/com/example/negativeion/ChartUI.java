@@ -31,36 +31,128 @@ public class ChartUI {
     public static void init(IMovingChart iMovingChart1){
         iMovingChart = iMovingChart1;
     }
-    //MP Bar Chart
-    public static void mpBarChart(BarChart barChart, float time, float value) {
-        BarData barData = barChart.getData(); //範型 Template
-        if (barData == null) {
-            barData = new BarData();
-            barChart.setData(barData);
+    //original version
+    public static void mpLineChart(final LineChart lineChart, List<NegativeIonModel> negativeIonList, int index)
+    {
+        LineData lineData = lineChart.getData();
+        if(lineData == null) {
+            lineData = new LineData();
+            lineChart.setData(lineData);
+            lineChart.setTouchEnabled(true);
 
-            barChart.setTouchEnabled(true);
-        } else {
-            IBarDataSet iBarDataSet = barData.getDataSetByIndex(0);
-            if (iBarDataSet == null) {
-                iBarDataSet = createBarDataSet();
-                barData.addDataSet(iBarDataSet);
-            }
-            iBarDataSet.addEntry(new BarEntry(time, value));
-            barData.notifyDataChanged();
-            barChart.notifyDataSetChanged();
-            barChart.moveViewToX(time);
+            lineChart.getAxisRight().setDrawLabels(false);
+            //lineChart.setVisibleXRangeMaximum(70);
         }
+        else{
+            ILineDataSet iLineDataSet1;
+            iLineDataSet1 = createEmptyLineDataSet();
+            lineData.addDataSet(iLineDataSet1); //for draw one point circle
+
+            ILineDataSet iLineDataSet = lineData.getDataSetByIndex(1);
+            if(iLineDataSet == null){
+                iLineDataSet = createLineDataSet(negativeIonList, index);
+                lineData.addDataSet(iLineDataSet);
+
+                iLineDataSet1.addEntry(iLineDataSet.getEntryForIndex(iLineDataSet.getEntryCount()-1));
+                XAxis xAxis = lineChart.getXAxis();
+
+                xAxis.setAvoidFirstLastClipping(true);
+                //xAxis.setAxisMaximum(240);
+                xAxis.setValueFormatter(new ValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value) {
+                        if((int)value >= mTimeStr.length)
+                            return "";
+                        System.out.println(value + "chart getX:" );
+                        //iMovingChart.MovingPoint();
+                        return mTimeStr[(int)value];
+                    }
+                });
+                xAxis.setLabelRotationAngle(-45);
+                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+
+                //lineChart.setMaxVisibleValueCount(9);
+            }else{
+                iLineDataSet.clear();
+                iLineDataSet = createLineDataSet(negativeIonList, index);
+                iLineDataSet1.addEntry(iLineDataSet.getEntryForIndex(iLineDataSet.getEntryCount()-1));
+            }
+            //lineChart.highlightValue(new Highlight(30f,0),true);
+            lineData.notifyDataChanged();
+            lineChart.notifyDataSetChanged();
+            //lineChart.moveViewToX(lineChart.getX());
+
+        }
+    }/*
+    private static LineDataSet createEmptyLineDataSet(){
+        LineDataSet set = new LineDataSet(new ArrayList<Entry>(), "" );
+        set.setCircleColor(Color.rgb(240, 238, 70));
+        set.setCircleRadius(5f);
+        return set;
+    }*/
+
+    private static LineDataSet createLineDataSet(List<NegativeIonModel> negativeIonList, int index) {
+
+        ArrayList<Entry> entries = new ArrayList<>();
+        int length = 0;
+        for(NegativeIonModel negativeIonModel : negativeIonList) {
+            //if(negativeIonModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(negativeIonModel.getTemperatureValue()) != 0) {
+                length++;
+            //}
+        }
+        mTimeStr = new String[length];
+        System.out.println(length);
+        int i=0;
+        for(NegativeIonModel negativeIonModel : negativeIonList) {
+            if (index == 1) {
+                //mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
+                entries.add(new Entry(i, Float.valueOf(negativeIonModel.getTemperatureValue())));
+                //i++;
+            } else if (index == 2) {
+                //mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
+                entries.add(new Entry(i, Float.valueOf(negativeIonModel.getHumidityValue())));
+                //i++;
+            } else if (index == 3){
+                //mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
+                entries.add(new Entry(i, Float.valueOf(negativeIonModel.getNegativeIonValue())));
+            }
+            else if(index == 4){
+                //mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
+                entries.add(new Entry(i, Float.valueOf(negativeIonModel.getPm25Value())));
+            }
+            mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
+            i++;
+            /*if(negativeIonModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(negativeIonModel.getTemperatureValue()) != 0) {
+                mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
+
+
+                Log.d(TAG, negativeIonModel.getTimeValue());
+                entries.add(new Entry(i//Float.valueOf(negativeIonModel.getTimeValue().substring(14).replace(':', '.'))
+                        , Float.valueOf(negativeIonModel.getTemperatureValue())));
+                i++;
+            }/*else
+                Log.d(TAG, negativeIonModel.getTimeValue().substring(5,7).compareTo("03") + "");*/
+        }//mTimeStr[i] = "\n";
+
+        LineDataSet set = new LineDataSet(entries, "Line DataSet:1" );
+        set.setColor(Color.rgb(240, 238, 70));
+        set.setLineWidth(2.5f);
+        set.setCircleColor(Color.rgb(240, 238, 70));
+        set.setCircleRadius(5f);
+        set.setFillColor(Color.rgb(240, 238, 70));
+        set.setMode(LineDataSet.Mode.LINEAR);
+        set.setDrawCircles(false);
+        //set.setDrawCircleHole(true);
+
+        set.setDrawValues(false);
+        set.setValueTextSize(10f);
+        set.setValueTextColor(Color.BLUE);
+        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+
+        return set;
     }
 
-    private static BarDataSet createBarDataSet() {
-        List<BarEntry> barEntryList = new ArrayList<>();
-        BarDataSet barDataSet = new BarDataSet(barEntryList, "First data");
-        barDataSet.setHighlightEnabled(true);
-        barDataSet.setHighLightColor(Color.parseColor("#FF0000"));
-        return barDataSet;
-    }
-
-    public static void mpLineChart(final LineChart lineChart, List<Temperature2Model> temperature2ModelList)
+    public static void mpLineChart_2tem(final LineChart lineChart, List<Temperature2Model> temperature2ModelList)
     {
         LineData lineData = lineChart.getData();
         if(lineData == null) {
@@ -101,7 +193,7 @@ public class ChartUI {
             for(int j = 0; j<hashSet.size(); j++){
                 ILineDataSet iLineDataSet = lineData.getDataSetByIndex(j+1);
                 if(iLineDataSet == null){
-                    iLineDataSet = createLineDataSet(temperature2ModelList, j);
+                    iLineDataSet = createLineDataSet_2tem(temperature2ModelList, j);
                     lineData.addDataSet(iLineDataSet);
                 }
             }
@@ -136,7 +228,7 @@ public class ChartUI {
         return set;
     }
 
-    private static LineDataSet createLineDataSet(List<Temperature2Model> temperature2ModelList, int index) {
+    private static LineDataSet createLineDataSet_2tem(List<Temperature2Model> temperature2ModelList, int index) {
 
         ArrayList<Entry> entries = new ArrayList<>();
 

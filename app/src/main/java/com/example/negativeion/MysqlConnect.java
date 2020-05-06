@@ -39,6 +39,9 @@ public class MysqlConnect {
     public static void setIndex(int index) {
         MysqlConnect.index = index;
     }
+    public int getIndex() {
+        return index;
+    }
 
     public static void setTime(String time) {
         MysqlConnect.time = time;

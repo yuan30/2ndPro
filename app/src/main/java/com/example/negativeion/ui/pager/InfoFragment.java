@@ -137,7 +137,7 @@ public class InfoFragment extends Fragment
         mLineChart.setOnChartGestureListener(this);
 
         mLineChart.getOnTouchListener().getLastGesture();
-        ChartUI.mpLineChart(mLineChart, null);
+        ChartUI.mpLineChart(mLineChart, null,0);
         ChartUI.init(this);
 
         mHandler = new Handler();
@@ -171,9 +171,12 @@ public class InfoFragment extends Fragment
                         }
                     });*///Toast.makeText(getActivity(), "資料讀取失敗", Toast.LENGTH_SHORT).show();
                     return;
-                }/*
+                }
                 mNegativeIonList.addAll(mMysqlConnect.getNegativeIonModelList());
-                ChartUI.mpLineChart(mLineChart, mNegativeIonList);
+
+                if(mLineChart.getData().getDataSetByIndex(1) != null)
+                    mLineChart.getData().getDataSetByIndex(1).clear();
+                ChartUI.mpLineChart(mLineChart, mNegativeIonList, mMysqlConnect.getIndex());
                 mLineChart.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -182,7 +185,7 @@ public class InfoFragment extends Fragment
                         mTvShowData.setText(value);
                        mLineChart.invalidate();//要在原生Thread才能使用
                     }
-                }, 500);*/
+                }, 500);
 
             }
         };
@@ -199,7 +202,11 @@ public class InfoFragment extends Fragment
 
                 mTemperature2ModelList.addAll(mMysqlConnect.getTemperatureModelList());
 
-                ChartUI.mpLineChart(mLineChart, mTemperature2ModelList);
+                if(mLineChart.getData().getDataSetByIndex(1) != null) {
+                    mLineChart.getData().getDataSetByIndex(1).clear();
+                    mLineChart.getData().getDataSetByIndex(2).clear();
+                }
+                ChartUI.mpLineChart_2tem(mLineChart, mTemperature2ModelList);
                 mLineChart.postDelayed(new Runnable() {
                     @Override
                     public void run() {
