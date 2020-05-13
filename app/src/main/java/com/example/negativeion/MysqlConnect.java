@@ -26,7 +26,10 @@ public class MysqlConnect {
     private String resStr = "";
 
     private static int index;
+    private static String date = null;
+    private static String date2 = null;
     private static String time = null;
+    private static String time2 = null;
 
     private List<NegativeIonModel> topicDatas = null;
     private List<Temperature2Model> topicTemperatureDatas = null;
@@ -36,17 +39,23 @@ public class MysqlConnect {
 
     }
 
-    public static void setIndex(int index) {
+    public void setIndex(int index) {
         MysqlConnect.index = index;
     }
+
     public int getIndex() {
         return index;
     }
 
-    public static void setTime(String time) {
+    public void setDateANDTime(String date, String time) {
+        MysqlConnect.date = date;
         MysqlConnect.time = time;
     }
 
+    public void setDate2ANDTime2(String date2, String time2) {
+        MysqlConnect.date2 = date2;
+        MysqlConnect.time2 = time2;
+    }
     public void CONN(){ //連上getData1.php，拿到頁面上的資料表的資料
         resStr = "";
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -57,7 +66,8 @@ public class MysqlConnect {
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://www.usblab.nctu.me/40643230test/php/getDataV2.php?index=" + index + "&time=" + time)
+                .url("http://www.usblab.nctu.me/40643230test/php/getDataV2.php?index=" + index +
+                        "&date=" + date + "&date2=" + date2 + "&time=" + time + "&time2=" + time2)
                 .method("GET", null)//, RequestBody.create(resBodyStr))
                 .build();
 
@@ -86,7 +96,7 @@ public class MysqlConnect {
         catch (JsonSyntaxException e){e.printStackTrace();resStr = e.getMessage() + "\n Json語法有誤，Gson轉失敗";}
         catch (Exception e){e.printStackTrace();resStr = e.getMessage();}
 
-        time = null;
+        date = null; date2 = null; time = null; time2 = null;
     }
 
     public void connectTemperature(){ //連上getData1.php，拿到頁面上的資料表的資料

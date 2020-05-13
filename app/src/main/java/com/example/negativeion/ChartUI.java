@@ -25,12 +25,9 @@ public class ChartUI {
 
     private final static String TAG = ChartUI.class.getSimpleName();
     private List<NegativeIonModel> mNegativeIonList;
-    private static IMovingChart iMovingChart;
     static String mTimeStr[];
 
-    public static void init(IMovingChart iMovingChart1){
-        iMovingChart = iMovingChart1;
-    }
+
     //original version
     public static void mpLineChart(final LineChart lineChart, List<NegativeIonModel> negativeIonList, int index)
     {
@@ -39,11 +36,13 @@ public class ChartUI {
             lineData = new LineData();
             lineChart.setData(lineData);
             lineChart.setTouchEnabled(true);
-
+            lineChart.setScaleEnabled(false);
             lineChart.getAxisRight().setDrawLabels(false);
             //lineChart.setVisibleXRangeMaximum(70);
         }
         else{
+            lineData = new LineData();
+            lineChart.setData(lineData);
             ILineDataSet iLineDataSet1;
             iLineDataSet1 = createEmptyLineDataSet();
             lineData.addDataSet(iLineDataSet1); //for draw one point circle
@@ -55,32 +54,33 @@ public class ChartUI {
 
                 iLineDataSet1.addEntry(iLineDataSet.getEntryForIndex(iLineDataSet.getEntryCount()-1));
                 XAxis xAxis = lineChart.getXAxis();
-
-                xAxis.setAvoidFirstLastClipping(true);
-                //xAxis.setAxisMaximum(240);
+                //xAxis.setAvoidFirstLastClipping(true); //會讓x原點往第二點靠近，最右邊往左靠近
+                //xAxis.setXOffset(-10);
+                //xAxis.setYOffset(5);
+                //xAxis.setDrawGridLines(false); //draw豎線，與Y軸平行的線
                 xAxis.setValueFormatter(new ValueFormatter() {
                     @Override
                     public String getFormattedValue(float value) {
                         if((int)value >= mTimeStr.length)
                             return "";
-                        System.out.println(value + "chart getX:" );
+                        //System.out.println(value + "chart getX:" );
                         //iMovingChart.MovingPoint();
                         return mTimeStr[(int)value];
                     }
                 });
-                xAxis.setLabelRotationAngle(-45);
+                xAxis.setLabelRotationAngle(-80);
                 xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-
-                //lineChart.setMaxVisibleValueCount(9);
             }else{
-                iLineDataSet.clear();
-                iLineDataSet = createLineDataSet(negativeIonList, index);
-                iLineDataSet1.addEntry(iLineDataSet.getEntryForIndex(iLineDataSet.getEntryCount()-1));
+                lineData.removeDataSet(1);
+                ILineDataSet iLineDataSet_new = createLineDataSet(negativeIonList, index);
+                lineData.addDataSet(iLineDataSet_new);
+                iLineDataSet1.addEntry(iLineDataSet_new.getEntryForIndex(iLineDataSet_new.getEntryCount()-1));
             }
-            //lineChart.highlightValue(new Highlight(30f,0),true);
+
             lineData.notifyDataChanged();
             lineChart.notifyDataSetChanged();
-            //lineChart.moveViewToX(lineChart.getX());
+            lineChart.moveViewToX(mTimeStr.length - (7-1));
+            lineChart.setVisibleXRangeMaximum(7);
 
         }
     }/*
@@ -106,6 +106,7 @@ public class ChartUI {
         for(NegativeIonModel negativeIonModel : negativeIonList) {
             if (index == 1) {
                 //mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
+
                 entries.add(new Entry(i, Float.valueOf(negativeIonModel.getTemperatureValue())));
                 //i++;
             } else if (index == 2) {
@@ -120,7 +121,7 @@ public class ChartUI {
                 //mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
                 entries.add(new Entry(i, Float.valueOf(negativeIonModel.getPm25Value())));
             }
-            mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
+            mTimeStr[i] = negativeIonModel.getTimeValue();//.substring(5);//11剛好只顯示時間
             i++;
             /*if(negativeIonModel.getTimeValue().substring(5,7).compareTo("04") >= 0 &&  Float.valueOf(negativeIonModel.getTemperatureValue()) != 0) {
                 mTimeStr[i] = negativeIonModel.getTimeValue().substring(11);
@@ -164,6 +165,8 @@ public class ChartUI {
             //lineChart.setVisibleXRangeMaximum(70);
         }
         else{
+            lineData = new LineData();
+            lineChart.setData(lineData);
             ILineDataSet iLineDataSet1;
             iLineDataSet1 = createEmptyLineDataSet();
             lineData.addDataSet(iLineDataSet1); //for draw one point circle
@@ -201,6 +204,7 @@ public class ChartUI {
 
             XAxis xAxis = lineChart.getXAxis();
             xAxis.setAvoidFirstLastClipping(true);
+            xAxis.setAxisMinimum(length-10);
             //xAxis.setAxisMaximum(240);
             xAxis.setValueFormatter(new ValueFormatter() {
                 @Override

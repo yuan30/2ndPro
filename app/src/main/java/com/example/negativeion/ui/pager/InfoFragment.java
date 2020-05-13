@@ -1,5 +1,7 @@
 package com.example.negativeion.ui.pager;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -13,10 +15,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.example.negativeion.ChartUI;
-import com.example.negativeion.IMovingChart;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.NegativeIonModel;
 import com.example.negativeion.R;
@@ -29,24 +32,27 @@ import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 
 public class InfoFragment extends Fragment
-                        implements OnChartValueSelectedListener, IMovingChart
+                        implements OnChartValueSelectedListener
                         , OnChartGestureListener {
 
     final String TAG = InfoFragment.class.getSimpleName();
     MysqlConnect mMysqlConnect;
     LineChart mLineChart;
     TextView mTvShowData;
-    TextView mTvTestSQL;
-
+    Button button0, button1, button2, button3, button4;
+    Button mBtnTime1, mBtnTime2, mBtnSearchTime;
     private List<NegativeIonModel> mNegativeIonList;
     private List<Temperature2Model> mTemperature2ModelList;
     private Handler mHandler;
     private Runnable CONNRunable;
+    private Runnable rGetLastValueRunnable;
 
+    int choose_year=0, choose_month, choose_day, choose_hour, choose_minute;
     public InfoFragment(){
 
     }
@@ -60,15 +66,19 @@ public class InfoFragment extends Fragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_info, container, false);
-        Button button0 =  view.findViewById(R.id.btn_2tem);
-        Button button1 =  view.findViewById(R.id.btn_tem);
-        Button button2 =  view.findViewById(R.id.btn_hum);
-        Button button3 =  view.findViewById(R.id.btn_neg);
-        Button button4 =  view.findViewById(R.id.btn_pm25);
+        button0 =  view.findViewById(R.id.btn_2tem);
+        button1 =  view.findViewById(R.id.btn_tem);
+        button2 =  view.findViewById(R.id.btn_hum);
+        button3 =  view.findViewById(R.id.btn_neg);
+        button4 =  view.findViewById(R.id.btn_pm25);
+
+        mBtnTime1 = view.findViewById(R.id.btn_time1);
+        mBtnTime2 = view.findViewById(R.id.btn_time2);
+        mBtnSearchTime = view.findViewById(R.id.btn_searchTime);
         button0.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -83,7 +93,8 @@ public class InfoFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                MysqlConnect.setIndex(1);
+                //MysqlConnect.setIndex(1);
+                mMysqlConnect.setIndex(1);
                 initRunnable();
                 new Thread(CONNRunable).start();
             }
@@ -93,7 +104,8 @@ public class InfoFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                MysqlConnect.setIndex(2);
+                //MysqlConnect.setIndex(2);
+                mMysqlConnect.setIndex(2);
                 initRunnable();
                 new Thread(CONNRunable).start();
             }
@@ -103,7 +115,8 @@ public class InfoFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                MysqlConnect.setIndex(3);
+                //MysqlConnect.setIndex(3);
+                mMysqlConnect.setIndex(3);
                 initRunnable();
                 new Thread(CONNRunable).start();
             }
@@ -113,9 +126,41 @@ public class InfoFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                MysqlConnect.setIndex(4);
+                //MysqlConnect.setIndex(4);
+                mMysqlConnect.setIndex(4);
                 initRunnable();
                 new Thread(CONNRunable).start();
+            }
+        });
+
+        mBtnTime1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dateAndTimePicker(v.getId(), mBtnTime1.getText().toString());
+            }
+        });
+
+        mBtnTime2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dateAndTimePicker(v.getId(), mBtnTime2.getText().toString());
+            }
+        });
+
+        mBtnSearchTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mBtnTime1.getText() != "" && mBtnTime2.getText() != "") {
+                    String str = ""+mBtnTime1.getText();
+                    String[] strArray = str.split(" ");
+                    String str2 = ""+mBtnTime2.getText();
+                    String[] strArray2 = str2.split(" ");
+
+                    //mBtnSearchTime.setText(strArray[0] + "哈" + strArray[1]);
+                    mMysqlConnect.setDateANDTime(strArray[0], strArray[1]);
+                    mMysqlConnect.setDate2ANDTime2(strArray2[0], strArray2[1]);
+                    new Thread(CONNRunable).start();
+                }
             }
         });
         return view;
@@ -125,7 +170,6 @@ public class InfoFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mTvTestSQL = getView().findViewById(R.id.tv_testSQL);
         mTvShowData = getView().findViewById(R.id.tv_showData);
         mMysqlConnect = new MysqlConnect();
         mNegativeIonList = new ArrayList<>();
@@ -138,16 +182,15 @@ public class InfoFragment extends Fragment
 
         mLineChart.getOnTouchListener().getLastGesture();
         ChartUI.mpLineChart(mLineChart, null,0);
-        ChartUI.init(this);
 
         mHandler = new Handler();
-        //initRunnable();
+        initRunnableFirst();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        new Thread(CONNRunable).start();
+        new Thread(rGetLastValueRunnable).start();
         mLineChart.notifyDataSetChanged();
     }
 
@@ -157,6 +200,82 @@ public class InfoFragment extends Fragment
 
     }
 
+    private void dateAndTimePicker(final int BtnId, String str_btn){
+        View view = View.inflate(getContext(), R.layout.datetime_picker, null);
+        final DatePicker datePicker = view.findViewById(R.id.DPicker);
+        final TimePicker timePicker = view.findViewById(R.id.TPicker);
+
+        int year=0, month=0, day=0, hour=0, minute=0;
+        Calendar c = Calendar.getInstance();
+
+        /** 日期選擇器 */
+        if(str_btn != null && str_btn != ""){
+            year = choose_year;
+            month = choose_month;
+            day = choose_day;
+        }else {
+            year = c.get(Calendar.YEAR);
+            month = c.get(Calendar.MONTH);
+            day = c.get(Calendar.DAY_OF_MONTH);
+        }
+        datePicker.init(year, month, day ,null);
+        /** 時間選擇器 */
+        if(str_btn != null && str_btn != "") {
+            hour = choose_hour;
+            minute = choose_minute;
+        }else {
+            hour = c.get(Calendar.HOUR_OF_DAY);
+            minute = c.get(Calendar.MINUTE);
+        }
+        timePicker.setIs24HourView(true);
+        timePicker.setHour(hour);
+        timePicker.setMinute(minute);
+        /** Dialog */
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setView(view).setTitle("選時間")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String strDateTime = ""; //"yyyy-MM-dd hh:mm:ss"
+                        strDateTime += datePicker.getYear() + "-" + (datePicker.getMonth()+1) + "-"
+                                + datePicker.getDayOfMonth();
+                        strDateTime += " " + timePicker.getHour() + ":" + timePicker.getMinute() + ":00";
+                        choose_year = datePicker.getYear();
+                        choose_month = datePicker.getMonth();
+                        choose_day = datePicker.getDayOfMonth();
+                        choose_hour = timePicker.getHour();
+                        choose_minute = timePicker.getMinute();
+
+                        if(BtnId == R.id.btn_time1)
+                            mBtnTime1.setText(strDateTime);
+                        else if(BtnId == R.id.btn_time2)
+                            mBtnTime2.setText(strDateTime);
+                    }
+                }).show();
+    }
+    private void initRunnableFirst() {
+        rGetLastValueRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mMysqlConnect.setIndex(0);
+                mMysqlConnect.CONN();
+                if(mMysqlConnect.getNegativeIonModelList() == null) {
+                    return;
+                }
+                final NegativeIonModel negativeIonModel =
+                        mMysqlConnect.getNegativeIonModelList().get(mMysqlConnect.getNegativeIonModelList().size()-1);
+                button1.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        button1.setText("溫度\n" + negativeIonModel.getTemperatureValue());
+                        button2.setText("濕度\n" + negativeIonModel.getHumidityValue());
+                        button3.setText("負離子\n" + negativeIonModel.getNegativeIonValue());
+                        button4.setText("PM2.5\n" + negativeIonModel.getPm25Value());
+                    }
+                },10);
+            }
+        };
+    }
     private void initRunnable() {
         CONNRunable = new Runnable() {
             @Override
@@ -172,6 +291,7 @@ public class InfoFragment extends Fragment
                     });*///Toast.makeText(getActivity(), "資料讀取失敗", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                mNegativeIonList.clear();
                 mNegativeIonList.addAll(mMysqlConnect.getNegativeIonModelList());
 
                 if(mLineChart.getData().getDataSetByIndex(1) != null)
@@ -203,8 +323,8 @@ public class InfoFragment extends Fragment
                 mTemperature2ModelList.addAll(mMysqlConnect.getTemperatureModelList());
 
                 if(mLineChart.getData().getDataSetByIndex(1) != null) {
-                    mLineChart.getData().getDataSetByIndex(1).clear();
-                    mLineChart.getData().getDataSetByIndex(2).clear();
+                   // mLineChart.getData().getDataSetByIndex(1).clear();
+                    //mLineChart.getData().getDataSetByIndex(2).clear();
                 }
                 ChartUI.mpLineChart_2tem(mLineChart, mTemperature2ModelList);
                 mLineChart.postDelayed(new Runnable() {
@@ -236,17 +356,6 @@ public class InfoFragment extends Fragment
 
     }
 
-    @Override
-    public void MovingPoint() {
-        Entry e = mLineChart.getData().getDataSetByIndex(1).getEntryForIndex(
-                (int)mLineChart.getData().getDataSetByIndex(0).getEntryForIndex(0).getX()
-        );
-        mTvShowData.setText(""+e.getY());
-        mLineChart.getData().getDataSetByIndex(0).removeLast();
-
-        mLineChart.getData().getDataSetByIndex(0).addEntry(e);
-
-    }
 
     @Override
     public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
@@ -280,7 +389,8 @@ public class InfoFragment extends Fragment
 
     @Override
     public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
-        Log.d(TAG, "onChartScale");
+        Log.d(TAG, "onChartScale:X=" + scaleX + "Y=" + scaleY);
+        Log.d(TAG, "x軸Min:" + mLineChart.getXAxis().getAxisMinimum() + " Max:" + mLineChart.getXAxis().getAxisMaximum());
     }
 
     @Override

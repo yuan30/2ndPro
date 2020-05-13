@@ -20,7 +20,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="雙溫度" />
+                android:text="雙溫度"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/btn_tem"
@@ -56,27 +57,44 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/editText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="time" />
-
-            <EditText
-                android:id="@+id/editText2"
+            <Button
+                android:id="@+id/btn_time1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:ems="10"
-                android:inputType="time" />
+                android:background="#FFFFFF"
+                android:hint="時間1" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="到" />
+
+            <Button
+                android:id="@+id/btn_time2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#FFFFFF"
+                android:hint="時間2" />
+
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_testSQL"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btn_searchTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="0"
+                android:background="#FFFFFF"
+                android:text="確定" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tv_showData"
@@ -84,7 +102,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:textColor="@color/design_default_color_secondary"
-            android:textSize="30sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <com.github.mikephil.charting.charts.LineChart
