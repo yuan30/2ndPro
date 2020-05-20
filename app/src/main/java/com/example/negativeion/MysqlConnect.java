@@ -1,5 +1,7 @@
 package com.example.negativeion;
 
+import android.util.Log;
+
 import com.example.negativeion.model.HumidityModel;
 import com.example.negativeion.model.TemperatureModel;
 import com.google.gson.Gson;
@@ -8,6 +10,11 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import okhttp3.FormBody;
@@ -128,6 +135,29 @@ public class MysqlConnect {
 
     }
 
+    public void connectRelay(){
+
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
+        Request request = new Request.Builder()
+                .url("http://www.usblab.nctu.me/40643230test/php/getRelayCondition.php")
+                .get()
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful())
+                return;
+
+            resStr = response.body().string() ;
+            //System.out.println(response.body().string());
+        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
+    }
+
     public void sendData(){//HumidityModel negativeIonModel 之後由這送電源開跟關去資料庫1
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -146,8 +176,8 @@ public class MysqlConnect {
         RequestBody formBody = params.build();*/
 
         Request request = new Request.Builder()
-                .url("http://www.usblab.nctu.me/40643230test/php/sendData1.php?what=Exist"+
-                        "&NegativeIon="+ 4000 + "&PM25=" + 5 + "&Temperature="+ 30 + "&Humidity=" + 59 + "&Time=2000-00-00 00:00:00")
+
+                //.url("http://www.usblab.nctu.me/40643230test/php/sendData1.php?what=Exist"+ "&NegativeIon="+ 4000 + "&PM25=" + 5 + "&Temperature="+ 30 + "&Humidity=" + 59 + "&Time=2000-00-00 00:00:00")
                 //.post(formBody)//.method("POST", formBody)
                 .build();
         try {
@@ -169,35 +199,8 @@ public class MysqlConnect {
     public List<NegativeIonModel> getNegativeIonModelList(){return topicDatas;}
 
     public List<Temperature2Model> getTemperatureModelList(){return topicTemperatureDatas;}
-    public void testSendData(){
 
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build();
-
-        RequestBody formBody = new FormBody.Builder()
-                .add("search", "Ray Du English")
-                .build();
-        Request request = new Request.Builder()
-                .url("https://en.wikipedia.org/w/index.php")
-                .post(formBody)
-                .build();
-
-        //OkHttpClient client = new OkHttpClient();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful())
-                return;
-
-            resStr = response.body().string() ;
-            //System.out.println(response.body().string());
-        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
-    }
-/*
-    public void init(){
+    public boolean init(){
         try{
             Class.forName("com.mysql.jdbc.Driver");
             Log.d(TAG,"加載驅動成功");
@@ -206,12 +209,15 @@ public class MysqlConnect {
         }
         try {
             Connection connection = DriverManager.getConnection(mysql_url, mysql_user, mysql_password);
-            Log.d(TAG,"Mysql的class 連接成功");
+            Log.d(TAG,"遠端連接成功");
         }catch (SQLException e){
-            Log.d(TAG,"Mysql的class 連接失敗");
+            Log.d(TAG,"遠端連接失敗");
+            return false;
         }
+        return true;
     }
-    public String getData() {
+
+    public String jdbcGetData() {
         String data = "";
         try {
             Connection connection = DriverManager.getConnection(mysql_url, mysql_user, mysql_password);
@@ -229,5 +235,21 @@ public class MysqlConnect {
             e.printStackTrace();
         }
         return data;
-    }*/
+    }
+
+    public String jdbcAddRelay() {
+        String str = "";
+        try {
+            Connection connection = DriverManager.getConnection(mysql_url, mysql_user, mysql_password);
+            String sql = "INSERT INTO relay (relay) VALUES (0)";
+            Statement statement = connection.createStatement();
+            statement.executeQuery(sql);
+            statement.close();
+            str = "資料寫入成功";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            str = "資料寫入失敗:" + e.toString();
+        }
+        return str;
+    }
 }
