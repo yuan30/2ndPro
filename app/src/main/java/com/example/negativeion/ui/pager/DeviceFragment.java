@@ -2,9 +2,11 @@ package com.example.negativeion.ui.pager;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -15,12 +17,14 @@ import android.widget.Toast;
 
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.R;
+import com.example.negativeion.RelayRVAdapter;
 import com.google.gson.annotations.Until;
 
 public class DeviceFragment extends Fragment {
 
     MysqlConnect mMysqlConnect;
     EditText editText;
+    RelayRVAdapter relayRVAdapter;
     private Runnable relayConditionRunnable, sendRunnable;
     public DeviceFragment() {
         // Required empty public constructor
@@ -31,6 +35,7 @@ public class DeviceFragment extends Fragment {
         super.onCreate(savedInstanceState);
         editText = new EditText(getContext());
         mMysqlConnect = new MysqlConnect();
+        relayRVAdapter.setOnItemClickListener(onItemClickListener);
         initRunnable();
     }
 
@@ -51,6 +56,19 @@ public class DeviceFragment extends Fragment {
         super.onResume();
         new Thread(relayConditionRunnable).start();
     }
+
+    private RelayRVAdapter.OnItemClickListener onItemClickListener = new RelayRVAdapter.OnItemClickListener() {
+        @RequiresApi(api = Build.VERSION_CODES.M)
+        @Override
+        public void onItemClick(View view, int position) {
+            Toast.makeText(getContext(), "短", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onItemLongClick(View view, int position) {
+            Toast.makeText(getContext(), "長", Toast.LENGTH_LONG).show();
+        }
+    };
 
     void initRunnable(){
         relayConditionRunnable = new Runnable() {
