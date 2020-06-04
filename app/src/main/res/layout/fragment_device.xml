@@ -7,16 +7,20 @@
     tools:context=".ui.pager.DeviceFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_relay"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:visibility="visible">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_relay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    </androidx.recyclerview.widget.RecyclerView>
 
-        </androidx.recyclerview.widget.RecyclerView>
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/srLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

@@ -158,7 +158,7 @@ public class MysqlConnect {
         }catch (IOException e){e.printStackTrace(); resStr = "GG";}
     }
 
-    public void sendData(){//HumidityModel negativeIonModel 之後由這送電源開跟關去資料庫1
+    public void sendData(int id, int relay){//HumidityModel negativeIonModel 之後由這送電源開跟關去資料庫1
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -221,13 +221,13 @@ public class MysqlConnect {
         String data = "";
         try {
             Connection connection = DriverManager.getConnection(mysql_url, mysql_user, mysql_password);
-            String sql = "SELECT * FROM data";
+            String sql = "SELECT * FROM relay";
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
             while (resultSet.next())
             {
-                String id = resultSet.getString("NegativeIon");
-                String name = resultSet.getString("Time");
+                String id = resultSet.getString("id");
+                String name = resultSet.getString("relay");
                 data += id + ", " + name + "\n";
             }
             statement.close();
