@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,98 +18,107 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Inflater;
 
-public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHolder> implements View.OnClickListener
-, View.OnLongClickListener{
+public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHolder> implements CompoundButton.OnCheckedChangeListener
+    ,View.OnLongClickListener{
 
 
 
     private List<String> mRelayList;
     private List<String> mRelayNameList;
     private Context mContext;
-    private EditText mEdtTxtRName;
     private OnItemClickListener mOnItemClickListener;
+    private OnCheckedChangeListener mOnCheckedChangeListener;
 
-    public RelayRVAdapter(Context context, EditText EdtTxtRName)
+    public RelayRVAdapter(Context context)
     {
         super();
         mContext = context;
-        mEdtTxtRName = EdtTxtRName;
     }
 
-    public void setRelayList(List<String> relayList, List<String> relayNameList){
-        this.mRelayList = relayList;
-        this.mRelayNameList = relayNameList;
-    }
-
-    public List<String> getmRelayList() {
+    public List<String> getRelayList() {
         return mRelayList;
     }
 
-    public List<String> getmRelayNameList() {
+    public void setRelayList(List<String> relayList){
+        this.mRelayList = relayList;
+    }
+
+    public List<String> getRelayNameList() {
         return mRelayNameList;
     }
 
+    public void setRelayNameList(List<String> relayNameList){
+        this.mRelayNameList = relayNameList;
+    }
     @NonNull
     @Override
     public RelayRVAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
-        view.setOnClickListener(this);
+        //view.setOnClickListener(this);
         view.setOnLongClickListener(this);
-        return new ViewHolder(view);
+        ViewHolder viewHolder = new ViewHolder(view);
+        view.setTag(viewHolder);
+        return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.itemView.setTag(position);
         holder.mTextView2.setText(mRelayNameList.get(position));
-        if(mRelayList.get(position).equals("0"))
-            holder.mTextView3.setText("關");
+        if(mRelayList.get(position).equals("0")) {
+            holder.mSwitch.setChecked(false);
+        }
+        else if(mRelayList.get(position).equals("1")) {
+            holder.mSwitch.setChecked(true);
+        }
         else
-            holder.mTextView3.setText("開");
+            holder.mSwitch.setText("錯誤");
+
+        holder.mSwitch.setTag(position);
+        holder.mSwitch.setOnCheckedChangeListener(this);
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
     }
 
+    public void OnCheckedChangeListener(OnCheckedChangeListener onCheckedChangeListener) {
+        this.mOnCheckedChangeListener = onCheckedChangeListener;
+    }
+
     public interface OnItemClickListener {
-        void onItemClick(View view, int position);
         void onItemLongClick(View view, int position, String string);
     }
 
+    public interface OnCheckedChangeListener{
+        void onCheckedChanged(CompoundButton buttonView, int position, int relay);
+    }
+
     @Override
-    public void onClick(View view) {
-        if(mOnItemClickListener != null){
-            mOnItemClickListener.onItemClick(view,(int)view.getTag());
-        }
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (isChecked)
+            mOnCheckedChangeListener.onCheckedChanged(buttonView, (int)buttonView.getTag(), 1);
+        else
+            mOnCheckedChangeListener.onCheckedChanged(buttonView, (int)buttonView.getTag(), 0);
     }
 
     @Override
     public boolean onLongClick(View view) {
         if(mOnItemClickListener != null){
-            mOnItemClickListener.onItemLongClick(view,(int)view.getTag(), mRelayList.get((int)view.getTag()));
-            /*final int position = (int)view.getTag();
-            mEdtTxtRName.setText(mRelayNameList.get(position)+"123");
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setTitle("修改繼電器資料")
-                    .setView(R.layout.dialog_alter_relay_name)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mRelayNameList.set(position, mEdtTxtRName.getText().toString());
-                        }
-                    }).show();*/
+            mOnItemClickListener.onItemLongClick(view, (int)view.getTag(), mRelayList.get((int)view.getTag()));
         }
         return false;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView mTextView2, mTextView3;
-        public ViewHolder(@NonNull View itemView) {
+        TextView mTextView2;
+        Switch mSwitch;
+
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             mTextView2 = itemView.findViewById(R.id.textView2);
-            mTextView3 = itemView.findViewById(R.id.textView3);
+            mSwitch = itemView.findViewById(R.id.switch1);
         }
     }
 

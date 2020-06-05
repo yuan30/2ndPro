@@ -32,6 +32,9 @@ public class MysqlConnect {
     private String mysql_password = "usblab603";
     private String resStr = "";
 
+
+    private int relayId;
+    private int relay;
     private static int index;
     private static String date = null;
     private static String date2 = null;
@@ -46,23 +49,6 @@ public class MysqlConnect {
 
     }
 
-    public void setIndex(int index) {
-        MysqlConnect.index = index;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public void setDateANDTime(String date, String time) {
-        MysqlConnect.date = date;
-        MysqlConnect.time = time;
-    }
-
-    public void setDate2ANDTime2(String date2, String time2) {
-        MysqlConnect.date2 = date2;
-        MysqlConnect.time2 = time2;
-    }
     public void CONN(){ //連上getData1.php，拿到頁面上的資料表的資料
         resStr = "";
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -158,7 +144,7 @@ public class MysqlConnect {
         }catch (IOException e){e.printStackTrace(); resStr = "GG";}
     }
 
-    public void sendData(int id, int relay){//HumidityModel negativeIonModel 之後由這送電源開跟關去資料庫1
+    public void sendRelay(){//之後由這送電源開跟關去資料庫1
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -167,31 +153,17 @@ public class MysqlConnect {
                 .addInterceptor(logging)
                 .build();
 
-        /*FormBody.Builder params = new FormBody.Builder();
-        params.add("NegativeIon", "1");
-        params.add("PM25", "1");
-        params.add("Temperature", "1");
-        params.add("Humidity", "1");
-        params.add("Time", "2000-00-00 00:00:00");
-        RequestBody formBody = params.build();*/
-
         Request request = new Request.Builder()
-
+                .url("http://www.usblab.nctu.me/40643230test/php/sendRelay.php?id="+ relayId +"&relay="+ relay)
+                .method("GET", null)
                 //.url("http://www.usblab.nctu.me/40643230test/php/sendData1.php?what=Exist"+ "&NegativeIon="+ 4000 + "&PM25=" + 5 + "&Temperature="+ 30 + "&Humidity=" + 59 + "&Time=2000-00-00 00:00:00")
                 //.post(formBody)//.method("POST", formBody)
                 .build();
         try {
             Response response = client.newCall(request).execute();
             resStr = response.body().string() ;//+ "\n" + response.toString();
+            //String[] c=resStr.split("");
         }catch (IOException e){e.printStackTrace(); resStr = "GG";}
-        /*RequestBody formBody = new FormBody.Builder()
-                .add("1", "2000")
-                .add("NegativeIon", "1200")
-                .add("PM25", "1")
-                .add("Temperature", "1")
-                .add("Humidity", "1")
-                .add("Time", "2000-00-0 00:00:00")
-                .build();*/
     }
 
     public String getResponse(){return resStr;}
@@ -200,6 +172,32 @@ public class MysqlConnect {
 
     public List<Temperature2Model> getTemperatureModelList(){return topicTemperatureDatas;}
 
+    public void setIndex(int index) {
+        MysqlConnect.index = index;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setDateANDTime(String date, String time) {
+        MysqlConnect.date = date;
+        MysqlConnect.time = time;
+    }
+
+    public void setDate2ANDTime2(String date2, String time2) {
+        MysqlConnect.date2 = date2;
+        MysqlConnect.time2 = time2;
+    }
+
+    public void setRelayId(int relayId) {
+        this.relayId = relayId;
+    }
+
+    public void setRelay(int relay) {
+        this.relay = relay;
+    }
+/*
     public boolean init(){
         try{
             Class.forName("com.mysql.jdbc.Driver");
@@ -251,5 +249,5 @@ public class MysqlConnect {
             str = "資料寫入失敗:" + e.toString();
         }
         return str;
-    }
+    }*/
 }

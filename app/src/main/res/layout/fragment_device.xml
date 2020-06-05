@@ -8,20 +8,20 @@
 
     <!-- TODO: Update blank fragment layout -->
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_relay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible">
-
-    </androidx.recyclerview.widget.RecyclerView>
-
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/srLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="visible">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_relay"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_margin="20dp"
+            android:visibility="visible">
+
+        </androidx.recyclerview.widget.RecyclerView>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </FrameLayout>

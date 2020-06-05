@@ -1,14 +1,11 @@
 package com.example.negativeion.ui.pager;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.net.Uri;
-import android.os.Build;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,7 +14,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.negativeion.MysqlConnect;
@@ -26,15 +25,17 @@ import com.example.negativeion.RelayRVAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class DeviceFragment extends Fragment {
 
     MysqlConnect mMysqlConnect;
-    EditText mEdtTxtRName;
-    AlertDialog.Builder builder;
     SwipeRefreshLayout mSwipeRefreshLayout;
     RelayRVAdapter mRelayRVAdapter;
     RecyclerView mRecyclerView;
+
     private Runnable relayConditionRunnable, sendRunnable;
     public DeviceFragment() {
         // Required empty public constructor
@@ -59,66 +60,99 @@ public class DeviceFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        View viewDialog = View.inflate(getContext(), R.layout.dialog_alter_relay_name, null);
-        builder = new AlertDialog.Builder(getContext()).setView(viewDialog);
-        mEdtTxtRName = viewDialog.findViewById(R.id.edtTxtRName);
-        mRecyclerView = getView().findViewById(R.id.rv_relay);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        try {
+            mRecyclerView = getView().findViewById(R.id.rv_relay);
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mRelayRVAdapter = new RelayRVAdapter(getContext(), mEdtTxtRName);
-        mRelayRVAdapter.setOnItemClickListener(onItemClickListener);
-        mRecyclerView.setAdapter(mRelayRVAdapter);
-        initRelayList();
+            mRelayRVAdapter = new RelayRVAdapter(getContext());
+            mRelayRVAdapter.setOnItemClickListener(onItemClickListener);
+            mRelayRVAdapter.OnCheckedChangeListener(onCheckedChangeListener);
+            mRecyclerView.setAdapter(mRelayRVAdapter);
+            initRelayList();
+        }catch (Exception e){
+            Toast.makeText(getContext(), "bug:"+e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
         new Thread(relayConditionRunnable).start();
+        Toast.makeText(getContext(), "更新資料中", Toast.LENGTH_SHORT).show();
 
+        SharedPreferences appSharedPrefs  = Objects.requireNonNull(getActivity()).
+                getSharedPreferences("negative_relay",MODE_PRIVATE);
+        List<String> list = mRelayRVAdapter.getRelayNameList();
+        for(int i = 0; i<list.size(); i++){
+            list.set(i, appSharedPrefs.getString(Integer.toString(i), "編號0"+i));
+        }
+        mRelayRVAdapter.setRelayNameList(list);
+        mRelayRVAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        //Toast.makeText(getContext(), "pause", Toast.LENGTH_SHORT).show();
+        SharedPreferences appSharedPrefs = getActivity().
+                getSharedPreferences("negative_relay",MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+        prefsEditor.clear();
+        List<String> list = mRelayRVAdapter.getRelayNameList();
+        for(int i = 0; i<list.size(); i++){
+            prefsEditor.putString(Integer.toString(i), list.get(i));
+        }
+        prefsEditor.apply();
     }
 
     private void initRelayList() {
         List<String> stringList = new ArrayList<>();
         stringList.add("0");
         stringList.add("0");
-        stringList.add("1");
+        stringList.add("0");
         stringList.add("0");
         stringList.add("0");
         List<String> nameList = new ArrayList<>();
         for(int i=0; i<5; i++)
             nameList.add("編號0"+i);
-        mRelayRVAdapter.setRelayList(stringList, nameList);
+        mRelayRVAdapter.setRelayList(stringList);
+        mRelayRVAdapter.setRelayNameList(nameList);
         mRelayRVAdapter.notifyDataSetChanged();
-        Toast.makeText(getContext(), " " + stringList.size(), Toast.LENGTH_SHORT).show();
     }
+
+    private RelayRVAdapter.OnCheckedChangeListener onCheckedChangeListener = new RelayRVAdapter.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, int position, int relay) {
+
+            mMysqlConnect.setRelayId(position+1);
+            mMysqlConnect.setRelay(relay);
+            new Thread(sendRunnable).start();
+        }
+    };
 
     private RelayRVAdapter.OnItemClickListener onItemClickListener = new RelayRVAdapter.OnItemClickListener() {
         @Override
-        public void onItemClick(View view, int position) {
-            Toast.makeText(getContext(), "輕點 開關 ", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
         public void onItemLongClick(View view, int position, String string) {
-            Toast.makeText(getContext(), "長" + position, Toast.LENGTH_LONG).show();
 
-
-            mEdtTxtRName.setText(mRelayRVAdapter.getmRelayNameList().get(position)+"123");
-            final List list = mRelayRVAdapter.getmRelayNameList();
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            final View v = inflater.inflate(R.layout.dialog_alter_relay_name, null);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            final EditText edtTxtRName = v.findViewById(R.id.edtTxtRName);
+            edtTxtRName.setText(mRelayRVAdapter.getRelayNameList().get(position));
+            final List list = mRelayRVAdapter.getRelayNameList();
             final int pos = position;
-            builder.setTitle("修改繼電器資料")
-                    .setView(R.layout.dialog_alter_relay_name)
+            builder.setTitle("修改繼電器名稱")
+                    .setView(v)
+                    .setCancelable(false)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            list.set(pos, mEdtTxtRName.getText().toString());
-                            mRelayRVAdapter.setRelayList(mRelayRVAdapter.getmRelayList(),
-                                    list);
-                            //mRelayNameList.set(position, mEdtTxtRName.getText().toString());
+                            list.set(pos, edtTxtRName.getText().toString());
+                            mRelayRVAdapter.setRelayNameList(list);
+                            mRelayRVAdapter.notifyDataSetChanged();
                         }
                     }).show();
-            mRelayRVAdapter.notifyDataSetChanged();
         }
     };
 
@@ -131,7 +165,23 @@ public class DeviceFragment extends Fragment {
                 mRecyclerView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getContext(), mMysqlConnect.getResponse(), Toast.LENGTH_SHORT).show();
+
+                        try {
+                            List<String> list = mRelayRVAdapter.getRelayList();
+                            String str = mMysqlConnect.getResponse();
+                            //Toast.makeText(getContext(), "re:"+list.size()+" str:"+mMysqlConnect.getResponse()+" "+str.length, Toast.LENGTH_SHORT).show();
+                            for(int i=0; i<list.size(); i++) {
+                                String strTemp = ""+str.charAt(i);
+                                list.set(i, strTemp);
+                            }
+                            mRelayRVAdapter.setRelayList(list);
+                            mRelayRVAdapter.notifyDataSetChanged();
+                            Toast.makeText(getContext(), "資料更新成功", Toast.LENGTH_SHORT).show();
+                        }catch (Exception e)
+                        {
+                            Toast.makeText(getContext(), "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+
                     }
                 },500);
             }
@@ -140,10 +190,17 @@ public class DeviceFragment extends Fragment {
         sendRunnable = new Runnable() {
             @Override
             public void run() {
-                boolean check = mMysqlConnect.init();
+                /*boolean check = mMysqlConnect.init();
                 if(check)
-                    mMysqlConnect.jdbcAddRelay();
+                    mMysqlConnect.jdbcAddRelay();*/
+                mMysqlConnect.sendRelay();
 
+                /*mRecyclerView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "傳送成功", Toast.LENGTH_SHORT).show();
+                    }
+                },500);*/
             }
         };
     }
