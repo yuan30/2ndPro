@@ -3,6 +3,7 @@ package com.example.negativeion.ui.login;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,6 +18,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 public class SignInActivity extends AppCompatActivity  implements
@@ -33,7 +35,7 @@ public class SignInActivity extends AppCompatActivity  implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
-        TextView mStatusTextView = findViewById(R.id.status);
+        mStatusTextView = findViewById(R.id.status);
 
         /** Google sign in*/
         // Set the dimensions of the sign-in button.
@@ -53,6 +55,7 @@ public class SignInActivity extends AppCompatActivity  implements
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         // [END build_client]
         findViewById(R.id.sign_in_button).setOnClickListener(this);
+        findViewById(R.id.button_sign_out).setOnClickListener(this);
     }
 
     @Override
@@ -105,26 +108,45 @@ public class SignInActivity extends AppCompatActivity  implements
     }
     // [END signIn]
 
+    private void signOut() {
+        mGoogleSignInClient.signOut()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // ...
+                    }
+                });
+    }
+
     private void updateUI(@Nullable GoogleSignInAccount account) {
         if (account != null) {
-            //mStatusTextView.setText(getString(R.string.signed_in_fmt, account.getDisplayName()));
+            mStatusTextView.setText(getString(R.string.signed_in_fmt, account.getDisplayName()
+                            + "\n" + account.getGivenName()+ "\n" + account.getId()+ "\n" + account.getIdToken()));
 
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             /*Intent intent = new Intent(SignInActivity.this, MainActivity.class);
             intent
             startActivity(intent);*/
             //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+            findViewById(R.id.button_sign_out).setVisibility(View.VISIBLE);
         } else {
-            //mStatusTextView.setText(R.string.signed_out);
+            mStatusTextView.setText(R.string.signed_out);
 
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
             //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
+            findViewById(R.id.button_sign_out).setVisibility(View.GONE);
         }
     }
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.sign_in_button)
-            signIn();
+        switch (v.getId()) {
+            case R.id.sign_in_button:
+                signIn();
+                break;
+            case R.id.button_sign_out:
+                signOut();
+                break;
+        }
     }
 }
