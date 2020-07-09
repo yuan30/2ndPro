@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.negativeion.ui.pager.AboutFragment;
 import com.example.negativeion.ui.pager.DeviceFragment;
@@ -17,12 +18,19 @@ public class MainActivity extends AppCompatActivity {
 
     private FragmentTransaction transaction;
     private FragmentManager fragmentManager;
-
+    private AboutFragment aboutFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setDefaultFragment();
+
+        aboutFragment = new AboutFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("User photoUrl",getIntent().getStringExtra("User photoUrl"));
+        bundle.putString("User name",getIntent().getStringExtra("User name"));
+        bundle.putString("User ID",getIntent().getStringExtra("User ID"));
+        aboutFragment.setArguments(bundle);
 
         BottomNavigationView mBottomNavigationView = findViewById(R.id.navigationView);
         mBottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -35,7 +43,11 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.content, new DeviceFragment()).commit();
 
     }
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        //Toast.makeText(this, "想登出?", Toast.LENGTH_SHORT).show();
+    }
     //設定3-5個碎片化介面
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -54,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     transaction.commit();
                     return true;
                 case R.id.item_bottom_about:
-                    transaction.replace(R.id.content, new AboutFragment());
+                    transaction.replace(R.id.content, aboutFragment);
                     transaction.commit();
                     return true;
             }

@@ -1,6 +1,9 @@
 package com.example.negativeion.ui.login;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,33 +12,51 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.negativeion.MainActivity;
 import com.example.negativeion.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class SignInActivity extends AppCompatActivity  implements
         View.OnClickListener{
 
+    private String idToken;
     private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
+    private int signInStatusCode = GoogleSignInStatusCodes.SUCCESS;
 
     private GoogleSignInClient mGoogleSignInClient;
     private TextView mStatusTextView;
-
+    private static ImageView mImageView;
+    private Runnable GetProfileRunable;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
         mStatusTextView = findViewById(R.id.status);
+        mImageView = findViewById(R.id.imageView);
+        mImageView.setImageResource(R.drawable.member);
 
         /** Google sign in*/
         // Set the dimensions of the sign-in button.
@@ -46,6 +67,7 @@ public class SignInActivity extends AppCompatActivity  implements
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
         // [END configure_signin]
@@ -62,12 +84,24 @@ public class SignInActivity extends AppCompatActivity  implements
     public void onStart() {
         super.onStart();
 
-        // [START on_start_sign_in]
-        // Check for existing Google Sign In account, if the user is already signed in
-        // the GoogleSignInAccount will be non-null.
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        updateUI(account);
+        if(getIntent().getBooleanExtra("Sign out", false)){
+            signOut();
+            getIntent().putExtra("Sign out", false);
+        }
+        else {
+            // [START on_start_sign_in]
+            // Check for existing Google Sign In account, if the user is already signed in
+            // the GoogleSignInAccount will be non-null.
+            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+            updateUI(account);
+        }
         // [END on_start_sign_in]
+        initRunnable();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     // [START onActivityResult]
@@ -90,12 +124,16 @@ public class SignInActivity extends AppCompatActivity  implements
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
 
+            idToken = account.getIdToken();
+            Log.w(TAG,"idToken=" + idToken);
+            new Thread(GetProfileRunable).start();
             // Signed in successfully, show authenticated UI.
             updateUI(account);
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
+            signInStatusCode = e.getStatusCode();
             updateUI(null);
         }
     }
@@ -113,27 +151,31 @@ public class SignInActivity extends AppCompatActivity  implements
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        // ...
+                        updateUI(null);
                     }
                 });
     }
 
     private void updateUI(@Nullable GoogleSignInAccount account) {
         if (account != null) {
-            mStatusTextView.setText(getString(R.string.signed_in_fmt, account.getDisplayName()
-                            + "\n" + account.getGivenName()+ "\n" + account.getId()+ "\n" + account.getIdToken()));
+            Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+            intent.putExtra("User photoUrl", account.getPhotoUrl().toString())
+                    .putExtra("User name", account.getDisplayName())
+                    .putExtra("User ID", account.getId());
+            startActivity(intent);
+            /*mStatusTextView.setText(getString(R.string.signed_in_fmt, account.getDisplayName()
+                            + "\n" + account.getId()));
 
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            /*Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-            intent
-            startActivity(intent);*/
-            //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-            findViewById(R.id.button_sign_out).setVisibility(View.VISIBLE);
+            startImageTask(account.getPhotoUrl().toString());
+            mImageView.setImageBitmap(getBitmapFromURL(account.getPhotoUrl().toString()));*/
+           /* findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+            findViewById(R.id.button_sign_out).setVisibility(View.VISIBLE);*/
         } else {
-            mStatusTextView.setText(R.string.signed_out);
-
+            //mStatusTextView.setText(R.string.signed_out);
+            mImageView.setImageResource(R.drawable.member);
+            if(signInStatusCode == GoogleSignInStatusCodes.NETWORK_ERROR)
+                Toast.makeText(this, "請連上網路", Toast.LENGTH_SHORT).show();
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
             findViewById(R.id.button_sign_out).setVisibility(View.GONE);
         }
     }
@@ -148,5 +190,64 @@ public class SignInActivity extends AppCompatActivity  implements
                 signOut();
                 break;
         }
+    }
+
+    public static void startImageTask(String photoUri)
+    {
+        //建立一個AsyncTask執行緒進行圖片讀取動作，並帶入圖片連結網址路徑
+        new AsyncTask<String, Void, Bitmap>()
+        {
+            @Override
+            protected Bitmap doInBackground(String... params)
+            {
+                String url = params[0];
+                return getBitmapFromURL(url);
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap result)
+            {
+                mImageView.setImageBitmap (result);
+                super.onPostExecute(result);
+            }
+        }.execute(photoUri);
+
+    }
+    public static Bitmap getBitmapFromURL(String photoUri)
+    {
+        try
+        {
+            URL url = new URL(photoUri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoInput(true);
+            conn.connect();
+            InputStream isCover = conn.getInputStream();
+            Bitmap bmpCover = BitmapFactory.decodeStream(isCover);
+            isCover.close();
+            return bmpCover;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    private void initRunnable() {
+        GetProfileRunable = new Runnable() {
+            @Override
+            public void run() {
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .build();
+
+                Request request = new Request.Builder()
+                        .url("https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken )
+                        .method("GET", null)//, RequestBody.create(resBodyStr))
+                        .build();
+                try {
+                    Response response = client.newCall(request).execute();
+                    Log.w(TAG, response.body().toString());
+                }catch (Exception e){}
+            }
+        };
     }
 }

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -176,10 +177,11 @@ public class DeviceFragment extends Fragment {
                             }
                             mRelayRVAdapter.setRelayList(list);
                             mRelayRVAdapter.notifyDataSetChanged();
-                            Toast.makeText(getContext(), "資料更新成功", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getContext(), "資料更新成功", Toast.LENGTH_SHORT).show();
                         }catch (Exception e)
                         {
-                            Toast.makeText(getContext(), "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.d("Device分頁", "ERROR" + e.getMessage());
+                            //Toast.makeText(getContext(), "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
 
                     }
