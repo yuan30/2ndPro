@@ -12,13 +12,11 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.negativeion.R;
-import com.example.negativeion.ui.login.SignInActivity;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.example.negativeion.activity.SignInActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 
 import java.io.InputStream;

@@ -1,22 +1,17 @@
 package com.example.negativeion;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Inflater;
 
 public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHolder> implements CompoundButton.OnCheckedChangeListener
     ,View.OnLongClickListener{
@@ -53,7 +48,7 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
     @NonNull
     @Override
     public RelayRVAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_relay_item, parent, false);
         //view.setOnClickListener(this);
         view.setOnLongClickListener(this);
         ViewHolder viewHolder = new ViewHolder(view);

@@ -1,4 +1,4 @@
-package com.example.negativeion;
+package com.example.negativeion.model;
 
 import com.google.gson.annotations.SerializedName;
 

@@ -21,9 +21,9 @@ import android.widget.TimePicker;
 
 import com.example.negativeion.ChartUI;
 import com.example.negativeion.MysqlConnect;
-import com.example.negativeion.NegativeIonModel;
+import com.example.negativeion.model.NegativeIonModel;
 import com.example.negativeion.R;
-import com.example.negativeion.Temperature2Model;
+import com.example.negativeion.model.Temperature2Model;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;

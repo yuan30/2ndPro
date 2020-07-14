@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/edtTxtDAddr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:maxLength="10"
+        android:text=""
+        android:hint="輸入裝置位置"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/edtTxtDName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:maxLength="10"
+        android:text=""
+        android:hint="輸入你想要的裝置名稱"
+        android:textSize="20sp" />
+</LinearLayout>

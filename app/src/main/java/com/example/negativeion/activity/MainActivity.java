@@ -1,4 +1,4 @@
-package com.example.negativeion;
+package com.example.negativeion.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.negativeion.R;
 import com.example.negativeion.ui.pager.AboutFragment;
 import com.example.negativeion.ui.pager.DeviceFragment;
 import com.example.negativeion.ui.pager.InfoFragment;

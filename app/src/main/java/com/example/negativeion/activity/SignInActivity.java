@@ -1,4 +1,4 @@
-package com.example.negativeion.ui.login;
+package com.example.negativeion.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.negativeion.MainActivity;
 import com.example.negativeion.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -31,7 +30,6 @@ import com.google.android.gms.tasks.Task;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

@@ -1,20 +1,13 @@
 package com.example.negativeion;
 
-import android.util.Log;
-
-import com.example.negativeion.model.HumidityModel;
-import com.example.negativeion.model.TemperatureModel;
+import com.example.negativeion.model.NegativeIonModel;
+import com.example.negativeion.model.Temperature2Model;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import okhttp3.FormBody;
