@@ -197,12 +197,12 @@ public class DeviceFragment extends Fragment {
                     mMysqlConnect.jdbcAddRelay();*/
                 mMysqlConnect.sendRelay();
 
-                /*mRecyclerView.postDelayed(new Runnable() {
+                mRecyclerView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getContext(), "傳送成功", Toast.LENGTH_SHORT).show();
+                        Log.d("POST Test", "body:" + mMysqlConnect.getResponse());
                     }
-                },500);*/
+                },500);
             }
         };
     }

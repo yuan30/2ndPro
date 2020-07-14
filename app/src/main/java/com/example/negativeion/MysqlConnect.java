@@ -58,10 +58,18 @@ public class MysqlConnect {
                 .addInterceptor(logging)
                 .build();
 
+        RequestBody requestBody = new FormBody.Builder()
+                .add("index", ""+index)
+                .add("date", ""+date)
+                .add("date2", ""+date2)
+                .add("time", ""+time)
+                .add("time2", ""+time2)
+                .build();
+
         Request request = new Request.Builder()
-                .url("http://www.usblab.nctu.me/40643230test/php/getDataV2.php?index=" + index +
-                        "&date=" + date + "&date2=" + date2 + "&time=" + time + "&time2=" + time2)
-                .method("GET", null)//, RequestBody.create(resBodyStr))
+                .url("https://www.usblab.nctu.me/40643230test/php/getDataV2.php")
+                //?index=" + index +"&date=" + date + "&date2=" + date2 + "&time=" + time + "&time2=" + time2)
+                .method("POST", requestBody)//, RequestBody.create(resBodyStr))
                 .build();
 
         try{
@@ -101,7 +109,7 @@ public class MysqlConnect {
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://www.usblab.nctu.me/40643230test/php/getTEMP.php?index=0")
+                .url("https://www.usblab.nctu.me/40643230test/php/getTEMP.php?index=0")
                 .method("GET", null)//, RequestBody.create(resBodyStr))
                 .build();
 
@@ -131,7 +139,7 @@ public class MysqlConnect {
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://www.usblab.nctu.me/40643230test/php/getRelayCondition.php")
+                .url("https://www.usblab.nctu.me/40643230test/php/getRelayCondition.php")
                 .get()
                 .build();
 
@@ -153,11 +161,16 @@ public class MysqlConnect {
                 .addInterceptor(logging)
                 .build();
 
+        FormBody.Builder params = new FormBody.Builder();
+        params.add("id", ""+relayId);
+        params.add("relay", ""+relay);
+        RequestBody formBody = params.build();
+
         Request request = new Request.Builder()
-                .url("http://www.usblab.nctu.me/40643230test/php/sendRelay.php?id="+ relayId +"&relay="+ relay)
-                .method("GET", null)
-                //.url("http://www.usblab.nctu.me/40643230test/php/sendData1.php?what=Exist"+ "&NegativeIon="+ 4000 + "&PM25=" + 5 + "&Temperature="+ 30 + "&Humidity=" + 59 + "&Time=2000-00-00 00:00:00")
-                //.post(formBody)//.method("POST", formBody)
+                //.url("http://www.usblab.nctu.me/40643230test/php/sendRelay.php?id="+ relayId +"&relay="+ relay)
+                //.method("GET", null)
+                .url("https://www.usblab.nctu.me/40643230test/php/sendRelay.php")
+                .method("POST", formBody)
                 .build();
         try {
             Response response = client.newCall(request).execute();

@@ -241,12 +241,12 @@ public class SignInActivity extends AppCompatActivity  implements
 
                 Request request = new Request.Builder()
                         .url("https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken )
-                        .method("GET", null)//, RequestBody.create(resBodyStr))
+                        .method("GET", null)
                         .build();
                 try {
                     Response response = client.newCall(request).execute();
-                    Log.w(TAG, response.body().toString());
-                }catch (Exception e){}
+                    Log.w(TAG, response.body().string());
+                } catch (Exception e){Log.w(TAG,""+e.getMessage());}
             }
         };
     }
