@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.negativeion.R;
+import com.example.negativeion.model.GoogleInfoModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -26,10 +27,13 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -47,6 +51,8 @@ public class SignInActivity extends AppCompatActivity  implements
     private TextView mStatusTextView;
     private static ImageView mImageView;
     private Runnable GetProfileRunable;
+
+    private GoogleInfoModel topicGoogleUserData;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +106,18 @@ public class SignInActivity extends AppCompatActivity  implements
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+        //finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     // [START onActivityResult]
@@ -243,8 +261,12 @@ public class SignInActivity extends AppCompatActivity  implements
                         .build();
                 try {
                     Response response = client.newCall(request).execute();
+                    Gson gson = new Gson();
+                    topicGoogleUserData = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
+                            , new TypeToken<GoogleInfoModel>(){ }.getType());
                     Log.w(TAG, response.body().string());
-                } catch (Exception e){Log.w(TAG,""+e.getMessage());}
+                    //Log.w(TAG, topicGoogleUserData.getUserId());
+                } catch (Exception e){Log.w(TAG,"Error:"+e.getMessage());}
             }
         };
     }

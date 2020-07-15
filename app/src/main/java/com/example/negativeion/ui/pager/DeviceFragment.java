@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.negativeion.DeviceRVAdapter;
@@ -47,12 +48,35 @@ public class DeviceFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_device, container, false);
+        //AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         FloatingActionButton fabAddDevice = view.findViewById(R.id.fabAddDevice);
         fabAddDevice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mDeviceRVAdapter.setDeviceTitle("測試用");
-                mDeviceRVAdapter.notifyDataSetChanged();
+                LayoutInflater inflater = LayoutInflater.from(getContext());
+                //原本放在上面，按下fab，Dialog設置此View後開啟，會將此View放在主畫面上
+                //而想再開一次Dialog會因為，此View已有一個parent，而出錯。
+                //解:1.將view放在這，每次新開一個;2.拿到該view的parent，removeView掉該View。
+                View addDeviceView = inflater.inflate(R.layout.dialog_add_device, null);
+                final EditText edtTxtDAddr = addDeviceView.findViewById(R.id.edtTxtDAddr);
+                final EditText edtTxtDName = addDeviceView.findViewById(R.id.edtTxtDName);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("新增裝置")
+                        .setView(addDeviceView)
+                        .setCancelable(false)
+                        .setPositiveButton("新增", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mDeviceRVAdapter.setDeviceTitle(edtTxtDName.getText().toString());
+                                mDeviceRVAdapter.notifyDataSetChanged();
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .show();
             }
         });
 
@@ -83,6 +107,8 @@ public class DeviceFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Toast.makeText(getContext(), "Id:" + getActivity().getIntent().getStringExtra("User ID"), Toast.LENGTH_SHORT)
+                .show();
         //new Thread(deviceRunnable).start();
         //Toast.makeText(getContext(), "更新資料中", Toast.LENGTH_SHORT).show();
 
