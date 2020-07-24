@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.negativeion.Attribute;
 import com.example.negativeion.R;
 import com.example.negativeion.model.GoogleInfoModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -175,9 +176,9 @@ public class SignInActivity extends AppCompatActivity  implements
     private void updateUI(@Nullable GoogleSignInAccount account) {
         if (account != null) {
             Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-            intent.putExtra("User photoUrl", account.getPhotoUrl().toString())
-                    .putExtra("User name", account.getDisplayName())
-                    .putExtra("User ID", account.getId());
+            intent.putExtra(Attribute.USER_PHOTOURL, account.getPhotoUrl().toString())
+                    .putExtra(Attribute.USER_NAME, account.getDisplayName())
+                    .putExtra(Attribute.USER_ID, account.getId());
             startActivity(intent);
             /*mStatusTextView.setText(getString(R.string.signed_in_fmt, account.getDisplayName()
                             + "\n" + account.getId()));
@@ -264,7 +265,7 @@ public class SignInActivity extends AppCompatActivity  implements
                     Gson gson = new Gson();
                     topicGoogleUserData = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
                             , new TypeToken<GoogleInfoModel>(){ }.getType());
-                    Log.w(TAG, response.body().string());
+                    Log.w(TAG, topicGoogleUserData.getUserId());
                     //Log.w(TAG, topicGoogleUserData.getUserId());
                 } catch (Exception e){Log.w(TAG,"Error:"+e.getMessage());}
             }

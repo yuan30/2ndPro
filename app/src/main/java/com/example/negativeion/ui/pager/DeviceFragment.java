@@ -19,10 +19,12 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.negativeion.Attribute;
 import com.example.negativeion.DeviceRVAdapter;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.R;
 import com.example.negativeion.activity.RelayActivity;
+import com.example.negativeion.model.UserAndDeviceModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
@@ -34,7 +36,8 @@ public class DeviceFragment extends Fragment {
     DeviceRVAdapter mDeviceRVAdapter;
     RecyclerView mDeviceRecyclerView;
 
-    private Runnable deviceRunnable;
+    private Runnable addUserDeviceRunnable, getUserDeviceRunnable;
+    private String userId="1321545600123", deviceId, deviceName;
     public DeviceFragment() {
         // Required empty public constructor
     }
@@ -60,6 +63,8 @@ public class DeviceFragment extends Fragment {
                 View addDeviceView = inflater.inflate(R.layout.dialog_add_device, null);
                 final EditText edtTxtDAddr = addDeviceView.findViewById(R.id.edtTxtDAddr);
                 final EditText edtTxtDName = addDeviceView.findViewById(R.id.edtTxtDName);
+                //用MQTT或其他方法接收MAC Addr，在這新增進RVA。
+                //mDeviceRVAdapter.setDeviceAddr();
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("新增裝置")
                         .setView(addDeviceView)
@@ -67,8 +72,15 @@ public class DeviceFragment extends Fragment {
                         .setPositiveButton("新增", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                mDeviceRVAdapter.setDeviceTitle(edtTxtDName.getText().toString());
+                                deviceName = edtTxtDName.getText().toString();
+                                //deviceId = edtTxtDAddr.getText().toString();
+                                deviceId ="CC:BB:CC:DD:EE:F"+mDeviceRVAdapter.getItemCount();
+                                //deviceId = "ww:aa:qq:ww:ww:ww";
+                                mDeviceRVAdapter.setDeviceName(deviceName);
+                                mDeviceRVAdapter.setDeviceAddr(deviceId);
                                 mDeviceRVAdapter.notifyDataSetChanged();
+
+                                new Thread(addUserDeviceRunnable).start();
                             }
                         })
                         .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -105,11 +117,19 @@ public class DeviceFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        new Thread(getUserDeviceRunnable).start();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        Toast.makeText(getContext(), "Id:" + getActivity().getIntent().getStringExtra("User ID"), Toast.LENGTH_SHORT)
+        Toast.makeText(getContext(), "Id:" + getActivity().getIntent().getStringExtra(Attribute.USER_ID), Toast.LENGTH_SHORT)
                 .show();
-        //new Thread(deviceRunnable).start();
+        //userId = getActivity().getIntent().getStringExtra("User ID");
+
         //Toast.makeText(getContext(), "更新資料中", Toast.LENGTH_SHORT).show();
 
         /*SharedPreferences appSharedPrefs  = Objects.requireNonNull(getActivity()).
@@ -125,6 +145,8 @@ public class DeviceFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        //mDeviceRVAdapter.removeAllDatas();
         //Toast.makeText(getContext(), "pause", Toast.LENGTH_SHORT).show();
        /* SharedPreferences appSharedPrefs = getActivity().
                 getSharedPreferences("negative_relay",MODE_PRIVATE);
@@ -141,15 +163,18 @@ public class DeviceFragment extends Fragment {
         @Override
         public void onItemClick(View view, int position) {
             Intent intent = new Intent(getActivity(), RelayActivity.class);
+            final String deviceId = mDeviceRVAdapter.getDeviceAddr(position);
+            intent.putExtra(Attribute.DEVICE_ID, deviceId);
+            Toast.makeText(getContext(), "D_MAC:"+deviceId,Toast.LENGTH_SHORT).show();
             startActivity(intent);
         }
     };
 
     void initRunnable(){
-        deviceRunnable = new Runnable() {
+        addUserDeviceRunnable = new Runnable() {
             @Override
             public void run() {
-                mMysqlConnect.connectRelay();
+                //mMysqlConnect.addUserAndDevice(userId, deviceId, deviceName);
 
                 mDeviceRecyclerView.postDelayed(new Runnable() {
                     @Override
@@ -177,5 +202,25 @@ public class DeviceFragment extends Fragment {
             }
         };
 
+        getUserDeviceRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mMysqlConnect.getUserAndDevice(userId);//還沒實作
+
+                mDeviceRecyclerView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        for(UserAndDeviceModel userAndDeviceModel : mMysqlConnect.getUserAndDeviceModelList())
+                        {
+                            //以位址做判斷，名稱重複沒關係
+                            if(mDeviceRVAdapter.setDeviceAddr(userAndDeviceModel.getDeviceId()))
+                                mDeviceRVAdapter.setDeviceName(userAndDeviceModel.getDeviceName());
+                            mDeviceRVAdapter.notifyDataSetChanged();
+                        }
+                    }
+                },10);
+            }
+        };
     }
 }

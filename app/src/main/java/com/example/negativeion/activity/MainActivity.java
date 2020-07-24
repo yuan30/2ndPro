@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.negativeion.Attribute;
 import com.example.negativeion.R;
 import com.example.negativeion.ui.pager.AboutFragment;
 import com.example.negativeion.ui.pager.DeviceFragment;
@@ -30,9 +31,9 @@ public class MainActivity extends AppCompatActivity {
 
         aboutFragment = new AboutFragment();
         Bundle bundle = new Bundle();
-        bundle.putString("User photoUrl",getIntent().getStringExtra("User photoUrl"));
-        bundle.putString("User name",getIntent().getStringExtra("User name"));
-        bundle.putString("User ID",getIntent().getStringExtra("User ID"));
+        bundle.putString(Attribute.USER_PHOTOURL,getIntent().getStringExtra(Attribute.USER_PHOTOURL));
+        bundle.putString(Attribute.USER_NAME,getIntent().getStringExtra(Attribute.USER_NAME));
+        bundle.putString(Attribute.USER_ID,getIntent().getStringExtra(Attribute.USER_ID));
         aboutFragment.setArguments(bundle);
 
         BottomNavigationView mBottomNavigationView = findViewById(R.id.navigationView);
