@@ -2,6 +2,7 @@ package com.example.negativeion;
 
 import com.example.negativeion.model.NegativeIonModel;
 import com.example.negativeion.model.Temperature2Model;
+import com.example.negativeion.model.UserAndDeviceModel;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -36,13 +37,14 @@ public class MysqlConnect {
 
     private List<NegativeIonModel> topicDatas = null;
     private List<Temperature2Model> topicTemperatureDatas = null;
+    private List<UserAndDeviceModel> topicUserAndDeviceDatas = null;
     //OkHttpClient client;
 
     public MysqlConnect(){
 
     }
 
-    public void CONN(){ //連上getData1.php，拿到頁面上的資料表的資料
+    public void CONN(){ //連上getDataV2.php，拿到頁面上的資料表的資料
         resStr = "";
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -93,7 +95,7 @@ public class MysqlConnect {
         date = null; date2 = null; time = null; time2 = null;
     }
 
-    public void connectTemperature(){ //連上getData1.php，拿到頁面上的資料表的資料
+    public void connectTemperature(){ //拿到雙溫度感測器的資料
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -122,7 +124,7 @@ public class MysqlConnect {
 
     }
 
-    public void connectRelay(){
+    public void addUserAndDevice(String userId, String deviceId, String deviceName){
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -131,9 +133,68 @@ public class MysqlConnect {
                 .addInterceptor(logging)
                 .build();
 
+        FormBody.Builder params = new FormBody.Builder();
+        params.add(Attribute.USER_ID, userId);
+        params.add(Attribute.DEVICE_ID, deviceId);
+        params.add(Attribute.DEVICE_NAME, deviceName);
+        RequestBody formBody = params.build();
+
         Request request = new Request.Builder()
-                .url("https://www.usblab.nctu.me/40643230test/php/getRelayCondition.php")
-                .get()
+                .url("https://www.usblab.nctu.me/40643230test/php/pdo/addUserDeviceTest.php")
+                .method("POST", formBody)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            resStr = response.body().string() ;//+ "\n" + response.toString();
+            //String[] c=resStr.split("");
+        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
+    }
+
+    public void updateRelay(String deviceId){//之後由這送電源開跟關去資料庫1
+
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
+        FormBody.Builder params = new FormBody.Builder();
+        params.add(Attribute.DEVICE_ID, deviceId);
+        params.add(Attribute.RELAY_ID, ""+relayId);
+        params.add(Attribute.RELAY, ""+relay);
+        RequestBody formBody = params.build();
+
+        Request request = new Request.Builder()
+                //.url("http://www.usblab.nctu.me/40643230test/php/sendRelay.php?id="+ relayId +"&relay="+ relay)
+                //.method("GET", null)
+                //.url("https://www.usblab.nctu.me/40643230test/php/sendRelay.php")
+                .url("https://www.usblab.nctu.me/40643230test/php/pdo/sendRelay.php")
+                .method("POST", formBody)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            resStr = response.body().string() ;//+ "\n" + response.toString();
+            //String[] c=resStr.split("");
+        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
+    }
+
+    public void getRelayCondition(String deviceId){
+
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
+        RequestBody requestBody = new FormBody.Builder()
+                .add(Attribute.DEVICE_ID, deviceId)
+                .build();
+
+        Request request = new Request.Builder()
+                .url("https://www.usblab.nctu.me/40643230test/php/pdo/getRelayCondition.php")
+                .method("POST", requestBody)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -145,7 +206,7 @@ public class MysqlConnect {
         }catch (IOException e){e.printStackTrace(); resStr = "GG";}
     }
 
-    public void sendRelay(){//之後由這送電源開跟關去資料庫1
+    public void getUserAndDevice(String userId){
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -154,21 +215,25 @@ public class MysqlConnect {
                 .addInterceptor(logging)
                 .build();
 
-        FormBody.Builder params = new FormBody.Builder();
-        params.add("id", ""+relayId);
-        params.add("relay", ""+relay);
-        RequestBody formBody = params.build();
+        RequestBody requestBody =  new FormBody.Builder()
+                .add(Attribute.USER_ID, userId)
+                .build();
 
         Request request = new Request.Builder()
-                //.url("http://www.usblab.nctu.me/40643230test/php/sendRelay.php?id="+ relayId +"&relay="+ relay)
-                //.method("GET", null)
-                .url("https://www.usblab.nctu.me/40643230test/php/sendRelay.php")
-                .method("POST", formBody)
+                .url("https://www.usblab.nctu.me/40643230test/php/pdo/getUserAndDevice.php")
+                .method("POST", requestBody)
                 .build();
-        try {
-            Response response = client.newCall(request).execute();
-            resStr = response.body().string() ;//+ "\n" + response.toString();
-            //String[] c=resStr.split("");
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful())
+                return;
+
+            Gson gson = new Gson();
+            topicUserAndDeviceDatas = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
+                    , new TypeToken<List<UserAndDeviceModel>>(){ }.getType());
+
+            //resStr = response.body().string() ;
+            //System.out.println(response.body().string());
         }catch (IOException e){e.printStackTrace(); resStr = "GG";}
     }
 
@@ -177,6 +242,8 @@ public class MysqlConnect {
     public List<NegativeIonModel> getNegativeIonModelList(){return topicDatas;}
 
     public List<Temperature2Model> getTemperatureModelList(){return topicTemperatureDatas;}
+
+    public List<UserAndDeviceModel> getUserAndDeviceModelList(){return topicUserAndDeviceDatas;}
 
     public void setIndex(int index) {
         MysqlConnect.index = index;

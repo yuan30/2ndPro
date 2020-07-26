@@ -16,7 +16,8 @@ import java.util.List;
 public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHolder> implements View.OnClickListener{
 
 
-    private List<String> deviceTitleList;
+    private List<String> deviceNameList;
+    private List<String> deviceAddrList;
     private Integer deviceIcon;
     private Context mContext;
     private OnItemClickListener mOnItemClickListener;
@@ -25,7 +26,8 @@ public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHo
     {
         super();
         mContext = context;
-        deviceTitleList = new ArrayList<>();
+        deviceNameList = new ArrayList<>();
+        deviceAddrList = new ArrayList<>();
         deviceIcon = R.drawable.ic_videogame_asset_black_24dp;
     }
 
@@ -43,7 +45,7 @@ public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.itemView.setTag(position);
-        holder.mDeviceTitle.setText(deviceTitleList.get(position));
+        holder.mDeviceTitle.setText(deviceNameList.get(position));
         holder.mDeviceIcon.setImageResource(deviceIcon);
     }
 
@@ -76,14 +78,36 @@ public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return deviceTitleList.size();
+        return deviceNameList.size();
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
     }
 
-    public void setDeviceTitle(String deviceTitle) {
-        this.deviceTitleList.add(deviceTitle);
+    public void setDeviceName(String deviceTitle) {
+        this.deviceNameList.add(deviceTitle);
+    }
+
+    public String getDeviceName(int position) {
+        return this.deviceNameList.get(position);
+    }
+
+    public boolean setDeviceAddr(String deviceAddr) {
+        if(!deviceAddrList.contains(deviceAddr)) {
+            this.deviceAddrList.add(deviceAddr);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    public String getDeviceAddr(int position) {
+       return this.deviceAddrList.get(position);
+    }
+
+    public void removeAllDatas() {
+        this.deviceAddrList.clear();
+        this.deviceNameList.clear();
     }
 }

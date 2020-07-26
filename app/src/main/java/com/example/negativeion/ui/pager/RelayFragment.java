@@ -1,5 +1,6 @@
 package com.example.negativeion.ui.pager;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,12 +9,15 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +26,9 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.negativeion.Attribute;
+import com.example.negativeion.IMqttResponse;
+import com.example.negativeion.MqttAsyncHelper;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.R;
 import com.example.negativeion.RelayRVAdapter;
@@ -36,14 +43,15 @@ import java.util.Objects;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class RelayFragment extends Fragment {
+public class RelayFragment extends Fragment implements IMqttResponse {
 
-    MysqlConnect mMysqlConnect;
-    SwipeRefreshLayout mSwipeRefreshLayout;
-    RelayRVAdapter mRelayRVAdapter;
-    RecyclerView mRelayRecyclerView;
+    private MqttAsyncHelper mMqttAsyncHelper;
+    private MysqlConnect mMysqlConnect;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private RelayRVAdapter mRelayRVAdapter;
+    private RecyclerView mRelayRecyclerView;
 
-    private Runnable relayConditionRunnable, sendRunnable;
+    private Runnable relayConditionRunnable, updateRunnable;
 
     public RelayFragment() {
         // Required empty public constructor
@@ -90,14 +98,18 @@ public class RelayFragment extends Fragment {
         new Thread(relayConditionRunnable).start();
         Toast.makeText(getContext(), "更新資料中", Toast.LENGTH_SHORT).show();
 
-        SharedPreferences appSharedPrefs  = Objects.requireNonNull(getActivity()).
-                getSharedPreferences("negative_relay",MODE_PRIVATE);
+        //try {
+            SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
+                    getSharedPreferences("negative_relay", MODE_PRIVATE);
+        //}catch (NullPointerException e){//假設為空，就從db上撈繼電器名稱}
         List<String> list = mRelayRVAdapter.getRelayNameList();
         for(int i = 0; i<list.size(); i++){
-            list.set(i, appSharedPrefs.getString(Integer.toString(i), "編號0"+i));
+            list.set(i, appSharedPrefs.getString(Integer.toString(i), "編號00"+i));
         }
         mRelayRVAdapter.setRelayNameList(list);
         mRelayRVAdapter.notifyDataSetChanged();
+
+        mqttConnect();
     }
 
     @Override
@@ -113,6 +125,9 @@ public class RelayFragment extends Fragment {
             prefsEditor.putString(Integer.toString(i), list.get(i));
         }
         prefsEditor.apply();
+
+        if(mMqttAsyncHelper != null)
+            mqttDisconnect();
     }
 
     private void initRelayList() {
@@ -136,7 +151,7 @@ public class RelayFragment extends Fragment {
 
             mMysqlConnect.setRelayId(position+1);
             mMysqlConnect.setRelay(relay);
-            new Thread(sendRunnable).start();
+            new Thread(updateRunnable).start();
         }
     };
 
@@ -169,7 +184,8 @@ public class RelayFragment extends Fragment {
         relayConditionRunnable = new Runnable() {
             @Override
             public void run() {
-                mMysqlConnect.connectRelay();
+                final String deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
+                mMysqlConnect.getRelayCondition(deviceId);
 
                 mRelayRecyclerView.postDelayed(new Runnable() {
                     @Override
@@ -193,25 +209,94 @@ public class RelayFragment extends Fragment {
                         }
 
                     }
-                },500);
+                },10);
             }
         };
 
-        sendRunnable = new Runnable() {
+        updateRunnable = new Runnable() {
             @Override
             public void run() {
                 /*boolean check = mMysqlConnect.init();
                 if(check)
                     mMysqlConnect.jdbcAddRelay();*/
-                mMysqlConnect.sendRelay();
+                final String deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
+                mMysqlConnect.updateRelay(deviceId);
 
                 mRelayRecyclerView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d("POST Test", "body:" + mMysqlConnect.getResponse());
+                        //Toast.makeText(getContext(), "MAC:"+deviceId, Toast.LENGTH_SHORT).show();
+                        //Log.d("POST Test", "body:" + mMysqlConnect.getResponse());
                     }
                 },500);
             }
         };
     }
+
+    public void mqttConnect()
+    {
+        final String deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
+        if (mMqttAsyncHelper == null) {
+            mMqttAsyncHelper = new MqttAsyncHelper(getContext(),RelayFragment.this);
+            mMqttAsyncHelper.setUsername("1")
+                    .setPassword("")
+                    .setClientId(deviceId)
+                    .setSubscriptionTopic("test123")
+                    .setPublishTopic("chat/nIon")
+                    .setQos(new int[]{1})
+                    .build();
+        } else {
+            mMqttAsyncHelper.setUsername("1")
+                    .setPassword("")
+                    .setClientId(deviceId)
+                    .setSubscriptionTopic("test123")
+                    .setPublishTopic("chat/nIon")
+                    .setQos(new int[]{1})
+                    .build();
+        }
+    }
+
+    public void mqttDisconnect()
+    {
+        mMqttAsyncHelper.disconnect();
+    }
+    @Override
+    public void receiveMessage(String topic, String response) {
+
+        Message msg = new Message();
+        msg.arg1 = 2;
+        msg.obj = response;
+        handler.sendMessage(msg);
+    }
+
+    @Override
+    public void connectState(boolean connectState) {
+
+        final String connectStateString;
+        if (connectState) {
+            connectStateString = "Connect";
+        } else {
+            connectStateString = "Disconnect";
+        }
+        Message msg = new Message();
+        msg.arg1 = 1;
+        msg.obj = connectStateString;
+        handler.sendMessage(msg);
+    }
+
+    @SuppressLint("HandlerLeak")
+    private static Handler handler = new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if(msg.arg1 == 1)
+            {
+                //mTxtConnectState.setText(msg.obj.toString());
+            }else if(msg.arg1 == 2){
+                //mTxtReceive.setText(mTxtReceive.getText().toString() + "\n" +msg.obj.toString());
+            }else if(msg.arg1 == 3){
+                //mTxtSend.setText(msg.obj.toString());
+            }
+        }
+    };
 }

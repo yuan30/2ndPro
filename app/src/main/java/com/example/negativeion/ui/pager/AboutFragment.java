@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.negativeion.Attribute;
 import com.example.negativeion.R;
 import com.example.negativeion.activity.SignInActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -69,9 +70,9 @@ public class AboutFragment extends Fragment {
 
     private void updateUI(@Nullable  Bundle bundle)
     {
-        String photoUri = bundle.getString("User photoUrl");
-        String userName = bundle.getString("User name");
-        String userID = bundle.getString("User ID");
+        String photoUri = bundle.getString(Attribute.USER_PHOTOURL);
+        String userName = bundle.getString(Attribute.USER_NAME);
+        String userID = bundle.getString(Attribute.USER_ID);
         mUserName.setText("歡迎 " + userName + " !");
         startImageTask(photoUri);
     }
