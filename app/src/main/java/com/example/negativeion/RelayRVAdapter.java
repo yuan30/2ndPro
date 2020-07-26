@@ -30,21 +30,6 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
         mContext = context;
     }
 
-    public List<String> getRelayList() {
-        return mRelayList;
-    }
-
-    public void setRelayList(List<String> relayList){
-        this.mRelayList = relayList;
-    }
-
-    public List<String> getRelayNameList() {
-        return mRelayNameList;
-    }
-
-    public void setRelayNameList(List<String> relayNameList){
-        this.mRelayNameList = relayNameList;
-    }
     @NonNull
     @Override
     public RelayRVAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -127,5 +112,20 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
         return mRelayList.size();
     }
 
+    public List<String> getRelayList() {
+        return mRelayList;
+    }
+
+    public void setRelayList(List<String> relayList){
+        this.mRelayList = relayList;
+    }
+
+    public List<String> getRelayNameList() {
+        return mRelayNameList;
+    }
+
+    public void setRelayNameList(List<String> relayNameList){
+        this.mRelayNameList = relayNameList;
+    }
 
 }

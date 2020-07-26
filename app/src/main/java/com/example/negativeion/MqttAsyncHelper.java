@@ -154,7 +154,7 @@ public class MqttAsyncHelper {
         String msgStr = str;
         msg.setPayload(msgStr.getBytes()); //訊息內容
         msg.setQos(1); //設定Qos等級，0,1,2
-        msg.setRetained(false); //是否保存最後一筆訊息，如果保存，client再次上線時，會再次收到上次發佈的最後一條訊息
+        msg.setRetained(true); //是否保存最後一筆訊息，如果保存，client再次上線時，會再次收到上次發佈的最後一條訊息
         try {
             mAsyncClient.publish(publishTopic, msg); //設定訊息的topic，並發佈
         } catch (MqttException e) {

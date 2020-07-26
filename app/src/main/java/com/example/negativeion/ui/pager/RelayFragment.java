@@ -38,6 +38,7 @@ import com.google.android.gms.plus.PlusOneButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -151,6 +152,13 @@ public class RelayFragment extends Fragment implements IMqttResponse {
 
             mMysqlConnect.setRelayId(position+1);
             mMysqlConnect.setRelay(relay);
+
+            List list = mRelayRVAdapter.getRelayList();
+            list.set(position, Integer.toString(relay));
+            mRelayRVAdapter.setRelayList(list);
+            //在RecycleView準備layout時，不能呼叫。因在onResume有上資料庫取值，更改switch後，再進來這，上傳資料庫(剛好循環)
+            //但畫面還沒準備好，所以在上傳資料庫之前，退出App。
+            //mRelayRVAdapter.notifyDataSetChanged();
             new Thread(updateRunnable).start();
         }
     };
@@ -222,6 +230,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 final String deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
                 mMysqlConnect.updateRelay(deviceId);
 
+                if(mMqttAsyncHelper != null)  //Turn ArrayList to Array and then to String.
+                    mMqttAsyncHelper.publishData(Arrays.toString(mRelayRVAdapter.getRelayList().toArray()));
                 mRelayRecyclerView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -291,6 +301,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             super.handleMessage(msg);
             if(msg.arg1 == 1)
             {
+                //Need to reconnect Mqtt, if the state equal Disconnect this word.
                 //mTxtConnectState.setText(msg.obj.toString());
             }else if(msg.arg1 == 2){
                 //mTxtReceive.setText(mTxtReceive.getText().toString() + "\n" +msg.obj.toString());
