@@ -2,11 +2,8 @@ package com.example.negativeion.ui.pager;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -32,10 +29,6 @@ import com.example.negativeion.MqttAsyncHelper;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.R;
 import com.example.negativeion.RelayRVAdapter;
-import com.example.negativeion.activity.RelayActivity;
-import com.example.negativeion.activity.SignInActivity;
-import com.google.android.gms.plus.PlusOneButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -227,11 +220,12 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 /*boolean check = mMysqlConnect.init();
                 if(check)
                     mMysqlConnect.jdbcAddRelay();*/
+                if(mMqttAsyncHelper != null)  //Turn ArrayList to Array and then to String.
+                    mMqttAsyncHelper.publishData(Arrays.toString(mRelayRVAdapter.getRelayList().toArray()));
+
                 final String deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
                 mMysqlConnect.updateRelay(deviceId);
 
-                if(mMqttAsyncHelper != null)  //Turn ArrayList to Array and then to String.
-                    mMqttAsyncHelper.publishData(Arrays.toString(mRelayRVAdapter.getRelayList().toArray()));
                 mRelayRecyclerView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -252,7 +246,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                     .setPassword("")
                     .setClientId(deviceId)
                     .setSubscriptionTopic("test123")
-                    .setPublishTopic("chat/nIon")
+                    .setPublishTopic("60:01:94:2c:d7:a6")
                     .setQos(new int[]{1})
                     .build();
         } else {
@@ -260,7 +254,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                     .setPassword("")
                     .setClientId(deviceId)
                     .setSubscriptionTopic("test123")
-                    .setPublishTopic("chat/nIon")
+                    .setPublishTopic("60:01:94:2c:d7:a6")
                     .setQos(new int[]{1})
                     .build();
         }

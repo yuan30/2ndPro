@@ -1,6 +1,7 @@
 package com.example.negativeion.ui.pager;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,7 +24,9 @@ import com.example.negativeion.Attribute;
 import com.example.negativeion.DeviceRVAdapter;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.R;
+import com.example.negativeion.activity.MainActivity;
 import com.example.negativeion.activity.RelayActivity;
+import com.example.negativeion.espsmartconfig.v1.EspTouchActivity;
 import com.example.negativeion.model.UserAndDeviceModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -32,15 +35,14 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class DeviceFragment extends Fragment {
 
-    MysqlConnect mMysqlConnect;
-    DeviceRVAdapter mDeviceRVAdapter;
-    RecyclerView mDeviceRecyclerView;
+    private Context mContext;
+    private MysqlConnect mMysqlConnect;
+    private DeviceRVAdapter mDeviceRVAdapter;
+    private RecyclerView mDeviceRecyclerView;
 
+    private FloatingActionButton fabAddDevice;
     private Runnable addUserDeviceRunnable, getUserDeviceRunnable;
-    private String userId="1321545600123", deviceId, deviceName;
-    public DeviceFragment() {
-        // Required empty public constructor
-    }
+    private String userId="1321545600123", deviceName;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,49 +53,12 @@ public class DeviceFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_device, container, false);
-        //AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        FloatingActionButton fabAddDevice = view.findViewById(R.id.fabAddDevice);
-        fabAddDevice.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LayoutInflater inflater = LayoutInflater.from(getContext());
-                //原本放在上面，按下fab，Dialog設置此View後開啟，會將此View放在主畫面上
-                //而想再開一次Dialog會因為，此View已有一個parent，而出錯。
-                //解:1.將view放在這，每次新開一個;2.拿到該view的parent，removeView掉該View。
-                View addDeviceView = inflater.inflate(R.layout.dialog_add_device, null);
-                final EditText edtTxtDAddr = addDeviceView.findViewById(R.id.edtTxtDAddr);
-                final EditText edtTxtDName = addDeviceView.findViewById(R.id.edtTxtDName);
-                //用MQTT或其他方法接收MAC Addr，在這新增進RVA。
-                //mDeviceRVAdapter.setDeviceAddr();
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("新增裝置")
-                        .setView(addDeviceView)
-                        .setCancelable(false)
-                        .setPositiveButton("新增", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                deviceName = edtTxtDName.getText().toString();
-                                //deviceId = edtTxtDAddr.getText().toString();
-                                deviceId ="CC:BB:CC:DD:EE:F"+mDeviceRVAdapter.getItemCount();
-                                //deviceId = "ww:aa:qq:ww:ww:ww";
-                                mDeviceRVAdapter.setDeviceName(deviceName);
-                                mDeviceRVAdapter.setDeviceAddr(deviceId);
-                                mDeviceRVAdapter.notifyDataSetChanged();
-
-                                new Thread(addUserDeviceRunnable).start();
-                            }
-                        })
-                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                        .show();
-            }
-        });
+        mContext = requireContext();
+        fabAddDevice = view.findViewById(R.id.fabAddDevice);
 
         mMysqlConnect = new MysqlConnect();
 
+        initView();
         initRunnable();
         return view;
     }
@@ -106,12 +71,12 @@ public class DeviceFragment extends Fragment {
             mDeviceRecyclerView = getView().findViewById(R.id.rv_device);
             mDeviceRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
 
-            mDeviceRVAdapter = new DeviceRVAdapter(getContext());
+            mDeviceRVAdapter = new DeviceRVAdapter(mContext);
             mDeviceRVAdapter.setOnItemClickListener(onItemClickListener);
 
             mDeviceRecyclerView.setAdapter(mDeviceRVAdapter);
         }catch (Exception e){
-            Toast.makeText(getContext(), "bug:"+e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "bug:"+e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -121,16 +86,30 @@ public class DeviceFragment extends Fragment {
         super.onStart();
 
         new Thread(getUserDeviceRunnable).start();
+        String str = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
+        if(str != null){
+            addDevice(str);
+        }
+        String deviceIdTemp="6001942cd7a6";
+        String str1 = "";
+        for(int i=0; i<deviceIdTemp.length(); i=i+2)
+            str1 = str1 + deviceIdTemp.substring(i, i+2) + ":";
+        str1 = str1.substring(0, str1.length()-1);
+
+        Log.d("DeviceFragment/deviceId","D長度" + deviceIdTemp.length());
+        Log.d("DeviceFragment/deviceId","長度" + deviceIdTemp.split("").length);
+        Log.d("DeviceFragment/deviceId","長度" + str1);
+        final String deviceId = str1;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Toast.makeText(getContext(), "Id:" + getActivity().getIntent().getStringExtra(Attribute.USER_ID), Toast.LENGTH_SHORT)
-                .show();
+        /*Toast.makeText(mContext, "Id:" + getActivity().getIntent().getStringExtra(Attribute.USER_ID), Toast.LENGTH_SHORT)
+                .show();*/
         //userId = getActivity().getIntent().getStringExtra("User ID");
 
-        //Toast.makeText(getContext(), "更新資料中", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(mContext, "更新資料中", Toast.LENGTH_SHORT).show();
 
         /*SharedPreferences appSharedPrefs  = Objects.requireNonNull(getActivity()).
                 getSharedPreferences("negative_relay",MODE_PRIVATE);
@@ -147,7 +126,7 @@ public class DeviceFragment extends Fragment {
         super.onPause();
 
         //mDeviceRVAdapter.removeAllDatas();
-        //Toast.makeText(getContext(), "pause", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(mContext, "pause", Toast.LENGTH_SHORT).show();
        /* SharedPreferences appSharedPrefs = getActivity().
                 getSharedPreferences("negative_relay",MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
@@ -159,13 +138,60 @@ public class DeviceFragment extends Fragment {
         prefsEditor.apply();*/
     }
 
+    private void initView()
+    {
+        fabAddDevice.setOnClickListener(v -> { //lambda 語法 need java 1.8
+            Intent intent = new Intent(mContext, EspTouchActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    private void addDevice(String deviceIdTemp)
+    {
+        String str = "";
+        for(int i=0; i<deviceIdTemp.length(); i=i+2)
+            str = str + deviceIdTemp.substring(i, i+2) + ":";
+        str = str.substring(0, str.length()-1);
+        final String deviceId = str;
+
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        //原本放在上面，按下fab，Dialog設置此View後開啟，會將此View放在主畫面上
+        //而想再開一次Dialog會因為，此View已有一個parent，而出錯。
+        //解:1.將view放在這，每次新開一個;2.拿到該view的parent，removeView掉該View。
+        View addDeviceView = inflater.inflate(R.layout.dialog_add_device, null);
+        final EditText edtTxtDAddr = addDeviceView.findViewById(R.id.edtTxtDAddr);
+        final EditText edtTxtDName = addDeviceView.findViewById(R.id.edtTxtDName);
+        //用MQTT或其他方法接收MAC Addr，在這新增進RVA。
+        //mDeviceRVAdapter.setDeviceAddr();
+        Toast.makeText(mContext, "MAC:" + deviceIdTemp, Toast.LENGTH_LONG).show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setTitle("新增裝置")
+                .setView(addDeviceView)
+                .setCancelable(false)
+                .setPositiveButton("新增", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deviceName = edtTxtDName.getText().toString();
+                        //deviceId = edtTxtDAddr.getText().toString();
+                        //deviceId ="CC:BB:CC:DD:EE:F"+mDeviceRVAdapter.getItemCount();
+                        //deviceId = "ww:aa:qq:ww:ww:ww";
+                        mDeviceRVAdapter.setDeviceName(deviceName);
+                        mDeviceRVAdapter.setDeviceAddr(deviceId);
+                        mDeviceRVAdapter.notifyDataSetChanged();
+
+                        //new Thread(addUserDeviceRunnable).start();
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
     private DeviceRVAdapter.OnItemClickListener onItemClickListener = new DeviceRVAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {
             Intent intent = new Intent(getActivity(), RelayActivity.class);
             final String deviceId = mDeviceRVAdapter.getDeviceAddr(position);
             intent.putExtra(Attribute.DEVICE_ID, deviceId);
-            Toast.makeText(getContext(), "D_MAC:"+deviceId,Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mContext, "D_MAC:"+deviceId,Toast.LENGTH_SHORT).show();
             startActivity(intent);
         }
     };
@@ -183,18 +209,18 @@ public class DeviceFragment extends Fragment {
                         /*try {
                             List<String> list = mDeviceRVAdapter.getRelayList();
                             String str = mMysqlConnect.getResponse();
-                            //Toast.makeText(getContext(), "re:"+list.size()+" str:"+mMysqlConnect.getResponse()+" "+str.length, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(mContext, "re:"+list.size()+" str:"+mMysqlConnect.getResponse()+" "+str.length, Toast.LENGTH_SHORT).show();
                             for(int i=0; i<list.size(); i++) {
                                 String strTemp = ""+str.charAt(i);
                                 list.set(i, strTemp);
                             }
                             mDeviceRVAdapter.setRelayList(list);
                             mDeviceRVAdapter.notifyDataSetChanged();
-                            //Toast.makeText(getContext(), "資料更新成功", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(mContext, "資料更新成功", Toast.LENGTH_SHORT).show();
                         }catch (Exception e)
                         {
                             Log.d("Device分頁", "ERROR" + e.getMessage());
-                            //Toast.makeText(getContext(), "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(mContext, "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }*/
 
                     }
@@ -211,13 +237,16 @@ public class DeviceFragment extends Fragment {
                     @Override
                     public void run() {
 
-                        for(UserAndDeviceModel userAndDeviceModel : mMysqlConnect.getUserAndDeviceModelList())
-                        {
-                            //以位址做判斷，名稱重複沒關係
-                            if(mDeviceRVAdapter.setDeviceAddr(userAndDeviceModel.getDeviceId()))
-                                mDeviceRVAdapter.setDeviceName(userAndDeviceModel.getDeviceName());
-                            mDeviceRVAdapter.notifyDataSetChanged();
-                        }
+                        try {
+                            for (UserAndDeviceModel userAndDeviceModel : mMysqlConnect.getUserAndDeviceModelList()) {
+                                //以位址做判斷，名稱重複沒關係
+                                if (mDeviceRVAdapter.setDeviceAddr(userAndDeviceModel.getDeviceId()))
+                                    mDeviceRVAdapter.setDeviceName(userAndDeviceModel.getDeviceName());
+                                mDeviceRVAdapter.notifyDataSetChanged();
+                            }
+                        }catch (Exception e){Toast.makeText(mContext, "系統目前出錯，請稍後再試", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();}
                     }
                 },10);
             }

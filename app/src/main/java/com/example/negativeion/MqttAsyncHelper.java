@@ -17,7 +17,7 @@ public class MqttAsyncHelper {
     private final String TAG = MqttAsyncHelper.class.getSimpleName();
 
     //MQTT Server
-    private final String serverUri = "tcp://140.130.35.239";// 140.130.31.183
+    private final String serverUri = "tcp://140.130.31.183";//  //140.130.35.239
 
     //訂閱
     private String subscriptionTopic = null;

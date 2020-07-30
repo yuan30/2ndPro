@@ -1,2 +1,7 @@
+include ':esptouch'
+include ':espsmartConfig'
+include ':lib'
+include ':mylibrary'
+include ':espsmartconfig'
 include ':app'
 rootProject.name='NegativeIon'
