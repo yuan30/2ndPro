@@ -19,8 +19,8 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.example.negativeion.Attribute;
 import com.example.negativeion.activity.MainActivity;
-import com.example.negativeion.espsmartconfig.EspTouchActivityAbs;
-import com.example.negativeion.espsmartconfig.EspTouchApp;
+import com.example.negativeion.espsmartconfig.SmartConfigActivityAbs;
+import com.example.negativeion.espsmartconfig.SmartConfigApp;
 import com.example.negativeion.R;
 import com.negativeion.espsmartconfig.EsptouchTask;
 import com.negativeion.espsmartconfig.IEsptouchResult;
@@ -32,24 +32,24 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EspTouchActivity extends EspTouchActivityAbs {
-    private static final String TAG = EspTouchActivity.class.getSimpleName();
+public class SmartConfigActivity extends SmartConfigActivityAbs {
+    private static final String TAG = SmartConfigActivity.class.getSimpleName();
 
     private static final int REQUEST_PERMISSION = 0x01;
 
     private static String sResultBssid;
 
-    private EspTouchViewModel mViewModel;
+    private SmartConfigViewModel mViewModel;
 
     private EsptouchAsyncTask4 mTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_esptouch);
-        mViewModel = new EspTouchViewModel();
+        setContentView(R.layout.activity_smartconfig);
+        mViewModel = new SmartConfigViewModel();
         mViewModel.apSsidTV = findViewById(R.id.apSsidText);
-        mViewModel.apBssidTV = findViewById(R.id.apBssidText);
+        //mViewModel.apBssidTV = findViewById(R.id.apBssidText);
         mViewModel.apPasswordEdit = findViewById(R.id.apPasswordEdit);
         //mViewModel.deviceCountEdit = findViewById(R.id.deviceCountEdit);
         //mViewModel.packageModeGroup = findViewById(R.id.packageModeGroup);
@@ -62,7 +62,7 @@ public class EspTouchActivity extends EspTouchActivityAbs {
             requestPermissions(permissions, REQUEST_PERMISSION);
         }
 
-        EspTouchApp.getInstance().observeBroadcast(this, broadcast -> {
+        SmartConfigApp.getInstance().observeBroadcast(this, broadcast -> {
             Log.d(TAG, "onCreate: Broadcast=" + broadcast);
             onWifiChanged();
         });
@@ -130,7 +130,7 @@ public class EspTouchActivity extends EspTouchActivityAbs {
             if (mTask != null) {
                 mTask.cancelEsptouch();
                 mTask = null;
-                new AlertDialog.Builder(EspTouchActivity.this)
+                new AlertDialog.Builder(SmartConfigActivity.this)
                         .setMessage(R.string.esptouch1_configure_wifi_change_message)
                         .setNegativeButton(android.R.string.cancel, null)
                         .show();
@@ -140,7 +140,7 @@ public class EspTouchActivity extends EspTouchActivityAbs {
     }
 
     private void executeEsptouch() {
-        EspTouchViewModel viewModel = mViewModel;
+        SmartConfigViewModel viewModel = mViewModel;
         byte[] ssid = viewModel.ssidBytes == null ? ByteUtil.getBytesByString(viewModel.ssid)
                 : viewModel.ssidBytes;
         CharSequence pwdStr = mViewModel.apPasswordEdit.getText();
@@ -160,14 +160,14 @@ public class EspTouchActivity extends EspTouchActivityAbs {
     }
 
     private static class EsptouchAsyncTask4 extends AsyncTask<byte[], IEsptouchResult, List<IEsptouchResult>> {
-        private WeakReference<EspTouchActivity> mActivity;
+        private WeakReference<SmartConfigActivity> mActivity;
 
         private final Object mLock = new Object();
         private ProgressDialog mProgressDialog;
         private AlertDialog mResultDialog;
         private IEsptouchTask mEsptouchTask;
 
-        EsptouchAsyncTask4(EspTouchActivity activity) {
+        EsptouchAsyncTask4(SmartConfigActivity activity) {
             mActivity = new WeakReference<>(activity);
         }
 
@@ -221,7 +221,7 @@ public class EspTouchActivity extends EspTouchActivityAbs {
 
         @Override
         protected List<IEsptouchResult> doInBackground(byte[]... params) {
-            EspTouchActivity activity = mActivity.get();
+            SmartConfigActivity activity = mActivity.get();
             int taskResultCount;
             synchronized (mLock) {
                 byte[] apSsid = params[0];
@@ -240,7 +240,7 @@ public class EspTouchActivity extends EspTouchActivityAbs {
 
         @Override
         protected void onPostExecute(List<IEsptouchResult> result) {
-            EspTouchActivity activity = mActivity.get();
+            SmartConfigActivity activity = mActivity.get();
             activity.mTask = null;
             mProgressDialog.dismiss();
             if (result == null) {
@@ -289,7 +289,7 @@ public class EspTouchActivity extends EspTouchActivityAbs {
     protected DialogInterface.OnClickListener resultRack = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            Intent intent = new Intent(EspTouchActivity.this, MainActivity.class);
+            Intent intent = new Intent(SmartConfigActivity.this, MainActivity.class);
             intent.putExtra(Attribute.DEVICE_ID, sResultBssid);
             startActivity(intent);
         }

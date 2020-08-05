@@ -16,8 +16,8 @@ import androidx.lifecycle.Observer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EspTouchApp extends Application {
-    private static EspTouchApp app;
+public class SmartConfigApp extends Application {
+    private static SmartConfigApp app;
 
     private MutableLiveData<String> mBroadcastData;
 
@@ -63,7 +63,7 @@ public class EspTouchApp extends Application {
         unregisterReceiver(mReceiver);
     }
 
-    public static EspTouchApp getInstance() {
+    public static SmartConfigApp getInstance() {
         return app;
     }
 

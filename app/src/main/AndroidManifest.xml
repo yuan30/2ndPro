@@ -13,7 +13,7 @@
     <dist:module dist:instant="true" />
 
     <application
-        android:name=".espsmartconfig.EspTouchApp"
+        android:name=".espsmartconfig.SmartConfigApp"
         android:allowBackup="true"
         android:icon="@mipmap/new_launcher"
         android:label="@string/app_name"
@@ -37,7 +37,7 @@
 
         <activity android:name=".activity.RelayActivity" />
 
-        <activity android:name=".espsmartconfig.v1.EspTouchActivity" />
+        <activity android:name=".espsmartconfig.v1.SmartConfigActivity" />
     </application>
 
 </manifest>

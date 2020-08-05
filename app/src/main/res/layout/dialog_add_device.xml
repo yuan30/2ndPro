@@ -2,27 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/edtTxtDAddr"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="輸入裝置位置(AA:BB:CC:DD:EE:FF)"
-        android:inputType="text"
-        android:maxLength="17"
-        android:text=""
-        android:textSize="16sp"
-        android:visibility="invisible" />
 
-    <EditText
-        android:id="@+id/edtTxtDName"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="輸入你想要的裝置名稱"
-        android:inputType="text"
-        android:maxLength="10"
-        android:text=""
-        android:textSize="16sp" />
+        android:text="@string/hint_device_name" />
+
+    <com.google.android.material.textfield.TextInputLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:counterEnabled="true"
+        app:counterMaxLength="10">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtTxtDName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLength="10"
+            android:textSize="16sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
 </LinearLayout>

@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">NegativeIon</string>
     <string name="sign_in_name">智慧農業負離子系統</string>
+    <string name="hint_device_name">裝置名稱</string>
+    <string name="hint_ap_password">Password</string>
+    <string name="help_ap_password">輸入WiFi密碼</string>
     <!-- Sign-in status messages -->
     <string name="sign_in">Sign in</string>
     <string name="signed_in_fmt">Signed in as: %s</string>
@@ -49,9 +52,7 @@
     <string name="esptouch2_title">EspTouch V2</string>
     <string name="esptouch2_about_version">EspTouch V2 Version: %s</string>
     <string name="esptouch2_ssid_label">SSID: </string>
-    <string name="esptouch2_bssid_label">BSSID: </string>
     <string name="esptouch2_ip_label">IP: </string>
-    <string name="esptouch2_password_label">Password</string>
     <string name="esptouch2_aes_key">AES Key</string>
     <string name="esptouch2_aes_key_error">AES Key must be null or 16 bytes data</string>
     <string name="esptouch2_custom_data">Custom Data</string>

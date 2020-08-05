@@ -4,13 +4,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
@@ -24,14 +22,10 @@ import com.example.negativeion.Attribute;
 import com.example.negativeion.DeviceRVAdapter;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.R;
-import com.example.negativeion.activity.MainActivity;
 import com.example.negativeion.activity.RelayActivity;
-import com.example.negativeion.espsmartconfig.v1.EspTouchActivity;
+import com.example.negativeion.espsmartconfig.v1.SmartConfigActivity;
 import com.example.negativeion.model.UserAndDeviceModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class DeviceFragment extends Fragment {
 
@@ -87,9 +81,9 @@ public class DeviceFragment extends Fragment {
 
         new Thread(getUserDeviceRunnable).start();
         String str = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
-        if(str != null){
-            addDevice(str);
-        }
+        if((str != null) && (str.compareTo("-1") != 0))
+                addDevice(str);
+
         String deviceIdTemp="6001942cd7a6";
         String str1 = "";
         for(int i=0; i<deviceIdTemp.length(); i=i+2)
@@ -141,7 +135,7 @@ public class DeviceFragment extends Fragment {
     private void initView()
     {
         fabAddDevice.setOnClickListener(v -> { //lambda 語法 need java 1.8
-            Intent intent = new Intent(mContext, EspTouchActivity.class);
+            Intent intent = new Intent(mContext, SmartConfigActivity.class);
             startActivity(intent);
         });
     }
@@ -159,7 +153,7 @@ public class DeviceFragment extends Fragment {
         //而想再開一次Dialog會因為，此View已有一個parent，而出錯。
         //解:1.將view放在這，每次新開一個;2.拿到該view的parent，removeView掉該View。
         View addDeviceView = inflater.inflate(R.layout.dialog_add_device, null);
-        final EditText edtTxtDAddr = addDeviceView.findViewById(R.id.edtTxtDAddr);
+
         final EditText edtTxtDName = addDeviceView.findViewById(R.id.edtTxtDName);
         //用MQTT或其他方法接收MAC Addr，在這新增進RVA。
         //mDeviceRVAdapter.setDeviceAddr();
@@ -184,6 +178,7 @@ public class DeviceFragment extends Fragment {
                 })
                 .setNegativeButton("取消", null)
                 .show();
+        getActivity().getIntent().putExtra(Attribute.DEVICE_ID, "-1");
     }
     private DeviceRVAdapter.OnItemClickListener onItemClickListener = new DeviceRVAdapter.OnItemClickListener() {
         @Override

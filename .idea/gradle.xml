@@ -13,9 +13,6 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/espsmartconfig" />
-            <option value="$PROJECT_DIR$/esptouch" />
-            <option value="$PROJECT_DIR$/lib" />
-            <option value="$PROJECT_DIR$/mylibrary" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

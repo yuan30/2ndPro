@@ -23,7 +23,7 @@ import androidx.core.location.LocationManagerCompat;
 
 import java.net.InetAddress;
 
-public abstract class EspTouchActivityAbs extends AppCompatActivity {
+public abstract class SmartConfigActivityAbs extends AppCompatActivity {
     private static final int MENU_ITEM_ABOUT = 0;
 
     private WifiManager mWifiManager;
