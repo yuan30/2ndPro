@@ -80,8 +80,8 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
                 onWifiChanged();
             } else {
                 new AlertDialog.Builder(this)
-                        .setTitle(R.string.esptouch1_location_permission_title)
-                        .setMessage(R.string.esptouch1_location_permission_message)
+                        .setTitle(R.string.smartconfig_location_permission_title)
+                        .setMessage(R.string.smartconfig_location_permission_message)
                         .setCancelable(false)
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> finish())
                         .show();
@@ -95,7 +95,7 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
 
     @Override
     protected String getEspTouchVersion() {
-        return getString(R.string.esptouch1_about_version, IEsptouchTask.ESPTOUCH_VERSION);
+        return getString(R.string.smartconfig_about_version, IEsptouchTask.ESPTOUCH_VERSION);
     }
 
     private StateResult check() {
@@ -124,14 +124,14 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
         if (stateResult.wifiConnected) {
             mViewModel.confirmEnable = true;
             if (stateResult.is5G) {
-                mViewModel.message = getString(R.string.esptouch1_wifi_5g_message);
+                mViewModel.message = getString(R.string.smartconfig_wifi_5g_message);
             }
         } else {
             if (mTask != null) {
                 mTask.cancelEsptouch();
                 mTask = null;
                 new AlertDialog.Builder(SmartConfigActivity.this)
-                        .setMessage(R.string.esptouch1_configure_wifi_change_message)
+                        .setMessage(R.string.smartconfig_configure_wifi_change_message)
                         .setNegativeButton(android.R.string.cancel, null)
                         .show();
             }
@@ -188,7 +188,7 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
         protected void onPreExecute() {
             Activity activity = mActivity.get();
             mProgressDialog = new ProgressDialog(activity);
-            mProgressDialog.setMessage(activity.getString(R.string.esptouch1_configuring_message));
+            mProgressDialog.setMessage(activity.getString(R.string.smartconfig_configuring_message));
             mProgressDialog.setCanceledOnTouchOutside(false);
             mProgressDialog.setOnCancelListener(dialog -> {
                 synchronized (mLock) {
@@ -245,7 +245,7 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
             mProgressDialog.dismiss();
             if (result == null) {
                 mResultDialog = new AlertDialog.Builder(activity)
-                        .setMessage(R.string.esptouch1_configure_result_failed_port)
+                        .setMessage(R.string.smartconfig_configure_result_failed_port)
                         .setPositiveButton(android.R.string.ok, null)
                         .show();
                 mResultDialog.setCanceledOnTouchOutside(false);
@@ -262,7 +262,7 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
 
             if (!firstResult.isSuc()) {
                 mResultDialog = new AlertDialog.Builder(activity)
-                        .setMessage(R.string.esptouch1_configure_result_failed)
+                        .setMessage(R.string.smartconfig_configure_result_failed)
                         .setPositiveButton(android.R.string.ok, null)
                         .show();
                 mResultDialog.setCanceledOnTouchOutside(false);
@@ -271,14 +271,14 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
 
             ArrayList<CharSequence> resultMsgList = new ArrayList<>(result.size());
             for (IEsptouchResult touchResult : result) {
-                String message = activity.getString(R.string.esptouch1_configure_result_success_item,
+                String message = activity.getString(R.string.smartconfig_configure_result_success_item,
                         touchResult.getBssid(), touchResult.getInetAddress().getHostAddress());
                 resultMsgList.add(message);
                 sResultBssid = touchResult.getBssid();
             }
             CharSequence[] items = new CharSequence[resultMsgList.size()];
             mResultDialog = new AlertDialog.Builder(activity)
-                    .setTitle(R.string.esptouch1_configure_result_success)
+                    .setTitle(R.string.smartconfig_configure_result_success)
                     .setItems(resultMsgList.toArray(items), null)
                     .setPositiveButton(android.R.string.ok, activity.resultRack)
                     .show();

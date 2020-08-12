@@ -1,7 +1,6 @@
 package com.example.negativeion.espsmartconfig;
 
 import android.Manifest;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
@@ -17,7 +16,6 @@ import android.view.MenuItem;
 
 import com.example.negativeion.R;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.location.LocationManagerCompat;
 
@@ -75,7 +73,7 @@ public abstract class SmartConfigActivityAbs extends AppCompatActivity {
             boolean locationGranted = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED;
             if (!locationGranted) {
-                String[] splits = getString(R.string.esptouch_message_permission).split("\n");
+                String[] splits = getString(R.string.smartconfig_message_permission).split("\n");
                 if (splits.length != 2) {
                     throw new IllegalArgumentException("Invalid String @RES esptouch_message_permission");
                 }
@@ -101,7 +99,7 @@ public abstract class SmartConfigActivityAbs extends AppCompatActivity {
             LocationManager manager = getSystemService(LocationManager.class);
             boolean enable = manager != null && LocationManagerCompat.isLocationEnabled(manager);
             if (!enable) {
-                result.message = getString(R.string.esptouch_message_location);
+                result.message = getString(R.string.smartconfig_message_location);
                 return result;
             }
         }
@@ -116,7 +114,7 @@ public abstract class SmartConfigActivityAbs extends AppCompatActivity {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
         boolean connected = NetUtils.isWifiConnected(mWifiManager);
         if (!connected) {
-            result.message = getString(R.string.esptouch_message_wifi_connection);
+            result.message = getString(R.string.smartconfig_message_wifi_connection);
             return result;
         }
 
@@ -135,7 +133,7 @@ public abstract class SmartConfigActivityAbs extends AppCompatActivity {
         result.message = "";
         result.is5G = NetUtils.is5G(wifiInfo.getFrequency());
         if (result.is5G) {
-            result.message = getString(R.string.esptouch_message_wifi_frequency);
+            result.message = getString(R.string.smartconfig_message_wifi_frequency);
         }
         result.ssid = ssid;
         result.ssidBytes = NetUtils.getRawSsidBytesOrElse(wifiInfo, ssid.getBytes());

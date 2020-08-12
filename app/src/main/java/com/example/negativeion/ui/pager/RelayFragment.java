@@ -93,8 +93,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         Toast.makeText(getContext(), "更新資料中", Toast.LENGTH_SHORT).show();
 
         //try {
-            SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
-                    getSharedPreferences("negative_relay", MODE_PRIVATE);
+        SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
+                getSharedPreferences("negative_relay", MODE_PRIVATE);
         //}catch (NullPointerException e){//假設為空，就從db上撈繼電器名稱}
         List<String> list = mRelayRVAdapter.getRelayNameList();
         for(int i = 0; i<list.size(); i++){

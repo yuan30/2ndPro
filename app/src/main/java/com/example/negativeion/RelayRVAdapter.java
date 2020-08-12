@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHolder> implements CompoundButton.OnCheckedChangeListener
-    ,View.OnLongClickListener{
+        ,View.OnLongClickListener{
 
 
 

@@ -76,6 +76,7 @@ public class InfoFragment extends Fragment
         mBtnTime1 = view.findViewById(R.id.btn_time1);
         mBtnTime2 = view.findViewById(R.id.btn_time2);
         mBtnSearchTime = view.findViewById(R.id.btn_searchTime);
+        mBtnSearchTime.setEnabled(false);
         button0.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -134,6 +135,7 @@ public class InfoFragment extends Fragment
             @Override
             public void onClick(View v) {
                 dateAndTimePicker(v.getId(), mBtnTime1.getText().toString());
+
             }
         });
 
@@ -141,6 +143,7 @@ public class InfoFragment extends Fragment
             @Override
             public void onClick(View v) {
                 dateAndTimePicker(v.getId(), mBtnTime2.getText().toString());
+                mBtnSearchTime.setEnabled(true);
             }
         });
 
