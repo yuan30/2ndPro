@@ -220,7 +220,7 @@ public class InfoFragment extends Fragment
         }
         datePicker.init(year, month, day ,null);
         /** 時間選擇器 */
-        if(str_btn != null && str_btn != "") {
+        if(str_btn != null && !str_btn.equals("")) {
             hour = choose_hour;
             minute = choose_minute;
         }else {

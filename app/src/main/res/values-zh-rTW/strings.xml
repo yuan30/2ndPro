@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">智慧農業負離子</string>
+    <string name="sign_in_name">智慧農業負離子系統</string>
+    <string name="hint_device_name">裝置名稱</string>
+    <string name="hint_ap_password">密碼</string>
+    <string name="help_ap_password">輸入WiFi密碼</string>
+    <!-- Sign-in status messages -->
+    <string name="sign_in">登入</string>
+    <string name="signed_in_fmt">Signed in as: %s</string>
+    <string name="signed_in">Signed in</string>
+    <string name="signing_in">Signing in…</string>
+    <string name="signed_out">Signed out</string>
+    <string name="signed_in_err">"Error: please check logs."</string>
+    <string name="error_null_person">
+        Error: Plus.PeopleApi.getCurrentPerson returned null. Ensure that the Google+ API is
+        enabled for your project, you have a properly configured google-services.json file
+        and that your device has an internet connection.
+    </string>
+    <string name="loading">Loading…</string>
+    <string name="auth_code_fmt">Auth Code: %s</string>
+    <string name="id_token_fmt">ID Token: %s</string>
+    <string name="server_client_id">183097898264-pvkcvs489oehd8sa2vmi64f3gspinqs9.apps.googleusercontent.com</string>
+
+    <!--ESP8266-->
+    <string name="esprssif_license">ESPRSSIF MIT License Copyright © 2019 ESPRESSIF SYSTEMS (SHANGHAI) PTE LTD
+        乐鑫 MIT 许可证 版权 © 2019 乐鑫信息科技（上海）股份有限公司</string>
+
+    <string name="smartconfig_message_permission">需要 GPS 來取得 Wi-Fi 資訊。 \n點擊申請權限</string>
+    <string name="smartconfig_message_location">請打開 GPS 以獲取 Wi-Fi 資訊。 </string>
+    <string name="smartconfig_message_wifi_connection">請先連上 Wi-Fi</string>
+    <string name="smartconfig_message_wifi_frequency">當前連接的是 5G Wi-Fi, 設備僅支持 2.4G Wi-Fi</string>
+
+    <string name="smartconfig_title">SmartConfig</string>
+    <string name="smartconfig_about_version">SmartConfig 版本:</string>
+    <string name="smartconfig_ssid_title">SSID: </string>
+    <string name="smartconfig_bssid_title">BSSID: </string>
+    <string name="smartconfig_password_title">Password: </string>
+    <string name="smartconfig_device_count_title">Device count: </string>
+    <string name="smartconfig_package_broadcast">Broadcast</string>
+    <string name="smartconfig_package_multicast">Multicast</string>
+    <string name="smartconfig_confirm">配對</string>
+    <string name="smartconfig_wifi_5g_message">不支援 5G Wi-Fi, 請確保目前連接的是2.4G的Wi-Fi</string>
+    <string name="smartconfig_location_permission_title">⚠ 警告</string>
+    <string name="smartconfig_location_permission_message">在 Android M 及以上版本，如果您禁止授權位置權限，APP將無法取得 Wi-Fi 資訊</string>
+    <string name="smartconfig_configuring_message">SmartConfig 正在配對, 請稍待片刻…</string>
+    <string name="smartconfig_configure_wifi_change_message">Wi-Fi 斷開 or 發生改變</string>
+    <string name="smartconfig_configure_result_failed">SmartConfig 失敗</string>
+    <string name="smartconfig_configure_result_failed_port">建立 SmartConfig 任務失敗, smartConfig port 可能被其他執行緒占用</string>
+    <string name="smartconfig_configure_result_success">SmartConfig 完成</string>
+    <string name="smartconfig_configure_result_success_item">BSSID = %1$s, InetAddress = %2$s</string>
+</resources>

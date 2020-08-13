@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">NegativeIon</string>
     <string name="sign_in_name">智慧農業負離子系統</string>
-    <string name="hint_device_name">裝置名稱</string>
+    <string name="hint_device_name">Device name</string>
     <string name="hint_ap_password">Password</string>
-    <string name="help_ap_password">輸入WiFi密碼</string>
+    <string name="help_ap_password">Type in WiFi password</string>
     <!-- Sign-in status messages -->
     <string name="sign_in">Sign in</string>
     <string name="signed_in_fmt">Signed in as: %s</string>
@@ -30,8 +30,8 @@
     <string name="smartconfig_message_wifi_connection">Please connect Wi-Fi first.</string>
     <string name="smartconfig_message_wifi_frequency">Current Wi-Fi connection is 5G, but the device just support 2.4G.</string>
 
-    <string name="smartconfig_title">EspTouch</string>
-    <string name="smartconfig_about_version">EspTouch Version: %s</string>
+    <string name="smartconfig_title">SmartConfig</string>
+    <string name="smartconfig_about_version">SmartConfig version:</string>
     <string name="smartconfig_ssid_title">SSID: </string>
     <string name="smartconfig_bssid_title">BSSID: </string>
     <string name="smartconfig_password_title">Password: </string>
@@ -46,6 +46,6 @@
     <string name="smartconfig_configure_wifi_change_message">Wi-Fi disconnected or changed</string>
     <string name="smartconfig_configure_result_failed">SmartConfig failed</string>
     <string name="smartconfig_configure_result_failed_port">Create SmartConfig task failed, the SmartConfig port could be used by other thread</string>
-    <string name="smartconfig_configure_result_success">SmartConfig 完成</string>
+    <string name="smartconfig_configure_result_success">SmartConfig success</string>
     <string name="smartconfig_configure_result_success_item">BSSID = %1$s, InetAddress = %2$s</string>
 </resources>
