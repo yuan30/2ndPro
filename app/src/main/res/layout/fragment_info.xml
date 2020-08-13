@@ -64,7 +64,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_time1"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="時間1" />
@@ -78,7 +78,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_time2"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="時間2" />

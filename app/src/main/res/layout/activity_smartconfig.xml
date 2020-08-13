@@ -66,12 +66,11 @@
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="101dp" />
 
-    <androidx.appcompat.widget.AppCompatButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/confirmBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/smartconfig_confirm"
-        android:textColor="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
