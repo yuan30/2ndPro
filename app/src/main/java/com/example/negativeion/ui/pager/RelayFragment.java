@@ -156,8 +156,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             //但畫面還沒準備好，所以在上傳資料庫之前，退出App。
             if(!mRelayRecyclerView.isComputingLayout()) //還在計算布局時，配適器內容不允許變動。
                 mRelayRVAdapter.notifyDataSetChanged();
-            if(bDeviceIsAlive) //確定裝置沒斷線才上傳，不然斷線時會一並將所有繼電器資料重置。
-                new Thread(updateRunnable).start();
+            //改成在執行緒裡確定裝置沒斷線才上傳 Mqtt，不然斷線時會一並將所有繼電器資料重置。
+            new Thread(updateRunnable).start();
         }
     };
 
@@ -225,7 +225,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 /*boolean check = mMysqlConnect.init();
                 if(check)
                     mMysqlConnect.jdbcAddRelay();*/
-                if(mMqttAsyncHelper != null)  //Turn ArrayList to Array and then to String.
+                if(mMqttAsyncHelper != null && bDeviceIsAlive)  //Turn ArrayList to Array and then to String.
                     mMqttAsyncHelper.publishData(Arrays.toString(mRelayRVAdapter.getRelayList().toArray()));
 
                 final String deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
@@ -248,15 +248,18 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                     Toast.makeText(getContext(), "裝置異常，請稍等...", Toast.LENGTH_LONG).show();
 
                     bDeviceIsAlive = false;
-                    for (int i = 0; i < mRelayRVAdapter.getRelayList().size(); i++)
-                        mRelayRVAdapter.getRelayList().set(i, "0");
+                    /*for (int i = 0; i < mRelayRVAdapter.getRelayList().size(); i++)
+                        mRelayRVAdapter.getRelayList().set(i, "0");*/
+                    mRelayRVAdapter.resetItemLayout();
                     mRelayRVAdapter.notifyDataSetChanged();
 
                 }else {
                     Toast.makeText(getContext(), "裝置重連中，請稍等...", Toast.LENGTH_SHORT).show();
 
                     bDeviceIsAlive = true;
+                    mRelayRVAdapter.resetItemLayout();
                     new Thread(relayConditionRunnable).start();
+                    new Thread(updateRunnable).start();
                 }
             }
         };

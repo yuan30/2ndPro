@@ -19,7 +19,7 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
     ,View.OnLongClickListener{
 
 
-
+    private Boolean bIsAlive = true;
     private List<String> mRelayList;
     private List<String> mRelayNameList;
     private Context mContext;
@@ -53,12 +53,13 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
         }
         else if(mRelayList.get(position).equals("1")) {
             holder.mSwitch.setChecked(true);
-            holder.mMainLayout.setBackgroundResource(0);
             holder.mMainLayout.setBackgroundResource(R.drawable.corners_smooth_switch_on);
         }
         else
             holder.mSwitch.setText("錯誤");
 
+        if(!bIsAlive)
+            holder.mMainLayout.setBackgroundResource(R.drawable.corners_smooth);
         holder.mSwitch.setTag(position);
         holder.mSwitch.setOnCheckedChangeListener(this);
     }
@@ -133,5 +134,9 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
 
     public void setRelayNameList(List<String> relayNameList){
         this.mRelayNameList = relayNameList;
+    }
+
+    public void resetItemLayout(){
+        this.bIsAlive = bIsAlive == true ? false : true;
     }
 }
