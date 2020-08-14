@@ -10,19 +10,19 @@
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="7sp"
-        android:layout_weight="1"
+        android:layout_weight="0.5"
         android:maxLength="10"
         android:text="編號00"
         android:textSize="20sp" />
 
     <Switch
         android:id="@+id/switch1"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.5"
+        android:layout_weight="1"
         android:checked="false" />
 
 </LinearLayout>

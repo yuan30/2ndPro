@@ -107,6 +107,13 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         mRelayRVAdapter.notifyDataSetChanged();
 
         mqttConnect();
+
+        if(bDeviceIsAlive) {
+            Toast.makeText(getContext(), "檢查裝置是否正常", Toast.LENGTH_SHORT).show();
+            mDeviceHandler.postDelayed(checkDeviceRunnable, 5000);
+        }
+        else
+            Toast.makeText(getContext(), "裝置異常，請稍等...", Toast.LENGTH_SHORT).show();
     }
 
     @Override

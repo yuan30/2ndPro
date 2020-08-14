@@ -58,8 +58,12 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
         else
             holder.mSwitch.setText("錯誤");
 
-        if(!bIsAlive)
+        if(!bIsAlive) {
             holder.mMainLayout.setBackgroundResource(R.drawable.corners_smooth);
+            holder.mSwitch.setText("斷線");
+        }else
+            holder.mSwitch.setText("");
+
         holder.mSwitch.setTag(position);
         holder.mSwitch.setOnCheckedChangeListener(this);
     }
