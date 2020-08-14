@@ -45,8 +45,10 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     private RelayRVAdapter mRelayRVAdapter;
     private RecyclerView mRelayRecyclerView;
 
-    private Runnable relayConditionRunnable, updateRunnable;
+    private Handler mDeviceHandler;
+    private Runnable relayConditionRunnable, updateRunnable, checkDeviceRunnable;
 
+    private boolean bDeviceIsAlive = true;
     public RelayFragment() {
         // Required empty public constructor
     }
@@ -63,6 +65,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
 
         mMysqlConnect = new MysqlConnect();
 
+        mDeviceHandler = new Handler();
         initRunnable();
         return view;
     }
@@ -151,8 +154,10 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             mRelayRVAdapter.setRelayList(list);
             //在RecycleView準備layout時，不能呼叫。因在onResume有上資料庫取值，更改switch後，再進來這，上傳資料庫(剛好循環)
             //但畫面還沒準備好，所以在上傳資料庫之前，退出App。
-            //mRelayRVAdapter.notifyDataSetChanged();
-            new Thread(updateRunnable).start();
+            if(!mRelayRecyclerView.isComputingLayout()) //還在計算布局時，配適器內容不允許變動。
+                mRelayRVAdapter.notifyDataSetChanged();
+            if(bDeviceIsAlive) //確定裝置沒斷線才上傳，不然斷線時會一並將所有繼電器資料重置。
+                new Thread(updateRunnable).start();
         }
     };
 
@@ -235,6 +240,26 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 },500);
             }
         };
+
+        checkDeviceRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if(bDeviceIsAlive) {
+                    Toast.makeText(getContext(), "裝置異常，請稍等...", Toast.LENGTH_LONG).show();
+
+                    bDeviceIsAlive = false;
+                    for (int i = 0; i < mRelayRVAdapter.getRelayList().size(); i++)
+                        mRelayRVAdapter.getRelayList().set(i, "0");
+                    mRelayRVAdapter.notifyDataSetChanged();
+
+                }else {
+                    Toast.makeText(getContext(), "裝置重連中，請稍等...", Toast.LENGTH_SHORT).show();
+
+                    bDeviceIsAlive = true;
+                    new Thread(relayConditionRunnable).start();
+                }
+            }
+        };
     }
 
     public void mqttConnect()
@@ -245,7 +270,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             mMqttAsyncHelper.setUsername("1")
                     .setPassword("")
                     .setClientId(deviceId)
-                    .setSubscriptionTopic("test123")
+                    .setSubscriptionTopic("60:01:94:2c:d7:a6@")
                     .setPublishTopic("60:01:94:2c:d7:a6")
                     .setQos(new int[]{1})
                     .build();
@@ -253,7 +278,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             mMqttAsyncHelper.setUsername("1")
                     .setPassword("")
                     .setClientId(deviceId)
-                    .setSubscriptionTopic("test123")
+                    .setSubscriptionTopic("60:01:94:2c:d7:a6@")
                     .setPublishTopic("60:01:94:2c:d7:a6")
                     .setQos(new int[]{1})
                     .build();
@@ -289,7 +314,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     }
 
     @SuppressLint("HandlerLeak")
-    private static Handler handler = new Handler(){
+    private Handler handler = new Handler(){
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
@@ -299,6 +324,13 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 //mTxtConnectState.setText(msg.obj.toString());
             }else if(msg.arg1 == 2){
                 //mTxtReceive.setText(mTxtReceive.getText().toString() + "\n" +msg.obj.toString());
+                mDeviceHandler.removeCallbacks(checkDeviceRunnable);
+                if(bDeviceIsAlive)
+                    mDeviceHandler.postDelayed(checkDeviceRunnable, 5000);
+                else {
+                    mDeviceHandler.post(checkDeviceRunnable);
+                    mDeviceHandler.postDelayed(checkDeviceRunnable, 5000);
+                }
             }else if(msg.arg1 == 3){
                 //mTxtSend.setText(msg.obj.toString());
             }

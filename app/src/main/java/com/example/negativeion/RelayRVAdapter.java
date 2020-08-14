@@ -5,16 +5,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHolder> implements CompoundButton.OnCheckedChangeListener
-        ,View.OnLongClickListener{
+    ,View.OnLongClickListener{
 
 
 
@@ -47,9 +49,12 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
         holder.mTextView2.setText(mRelayNameList.get(position));
         if(mRelayList.get(position).equals("0")) {
             holder.mSwitch.setChecked(false);
+            holder.mMainLayout.setBackgroundResource(R.drawable.corners_smooth);
         }
         else if(mRelayList.get(position).equals("1")) {
             holder.mSwitch.setChecked(true);
+            holder.mMainLayout.setBackgroundResource(0);
+            holder.mMainLayout.setBackgroundResource(R.drawable.corners_smooth_switch_on);
         }
         else
             holder.mSwitch.setText("錯誤");
@@ -92,11 +97,13 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
+        LinearLayout mMainLayout;
         TextView mTextView2;
         Switch mSwitch;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
+            mMainLayout = itemView.findViewById(R.id.mainLayout);
             mTextView2 = itemView.findViewById(R.id.textView2);
             mSwitch = itemView.findViewById(R.id.switch1);
         }
@@ -127,5 +134,4 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
     public void setRelayNameList(List<String> relayNameList){
         this.mRelayNameList = relayNameList;
     }
-
 }
