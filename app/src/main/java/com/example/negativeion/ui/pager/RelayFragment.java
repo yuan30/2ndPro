@@ -29,6 +29,7 @@ import com.example.negativeion.MqttAsyncHelper;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.R;
 import com.example.negativeion.RelayRVAdapter;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +50,9 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     private Runnable relayConditionRunnable, updateRunnable, checkDeviceRunnable;
 
     private boolean bDeviceIsAlive = true;
+
+    String deviceId;
+
     public RelayFragment() {
         // Required empty public constructor
     }
@@ -75,6 +79,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         super.onActivityCreated(savedInstanceState);
 
         try {
+            deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
+
             mRelayRecyclerView = getView().findViewById(R.id.rv_relay);
             mRelayRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -93,6 +99,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     public void onResume() {
         super.onResume();
         new Thread(relayConditionRunnable).start();
+        Snackbar.make(getView(), deviceId, Snackbar.LENGTH_SHORT).show();
         Toast.makeText(getContext(), "更新資料中", Toast.LENGTH_SHORT).show();
 
         //try {
@@ -197,7 +204,6 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         relayConditionRunnable = new Runnable() {
             @Override
             public void run() {
-                final String deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
                 mMysqlConnect.getRelayCondition(deviceId);
 
                 mRelayRecyclerView.postDelayed(new Runnable() {
@@ -235,7 +241,6 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 if(mMqttAsyncHelper != null && bDeviceIsAlive)  //Turn ArrayList to Array and then to String.
                     mMqttAsyncHelper.publishData(Arrays.toString(mRelayRVAdapter.getRelayList().toArray()));
 
-                final String deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
                 mMysqlConnect.updateRelay(deviceId);
 
                 mRelayRecyclerView.postDelayed(new Runnable() {
@@ -274,22 +279,21 @@ public class RelayFragment extends Fragment implements IMqttResponse {
 
     public void mqttConnect()
     {
-        final String deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
         if (mMqttAsyncHelper == null) {
             mMqttAsyncHelper = new MqttAsyncHelper(getContext(),RelayFragment.this);
             mMqttAsyncHelper.setUsername("1")
                     .setPassword("")
                     .setClientId(deviceId)
-                    .setSubscriptionTopic("60:01:94:2c:d7:a6@")
-                    .setPublishTopic("60:01:94:2c:d7:a6")
+                    .setSubscriptionTopic(deviceId + "@")
+                    .setPublishTopic(deviceId)
                     .setQos(new int[]{1})
                     .build();
         } else {
             mMqttAsyncHelper.setUsername("1")
                     .setPassword("")
                     .setClientId(deviceId)
-                    .setSubscriptionTopic("60:01:94:2c:d7:a6@")
-                    .setPublishTopic("60:01:94:2c:d7:a6")
+                    .setSubscriptionTopic(deviceId + "@")
+                    .setPublishTopic(deviceId)
                     .setQos(new int[]{1})
                     .build();
         }

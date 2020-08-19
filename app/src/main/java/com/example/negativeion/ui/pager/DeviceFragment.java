@@ -36,7 +36,7 @@ public class DeviceFragment extends Fragment {
 
     private FloatingActionButton fabAddDevice;
     private Runnable addUserDeviceRunnable, getUserDeviceRunnable;
-    private String userId="1321545600123", deviceName;
+    private String userId="1321545600123", deviceName, deviceId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,7 +82,7 @@ public class DeviceFragment extends Fragment {
         new Thread(getUserDeviceRunnable).start();
         String str = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
         if((str != null) && (str.compareTo("-1") != 0))
-                addDevice(str);
+            addDevice(str);
 
         String deviceIdTemp="6001942cd7a6";
         String str1 = "";
@@ -147,6 +147,7 @@ public class DeviceFragment extends Fragment {
             str = str + deviceIdTemp.substring(i, i+2) + ":";
         str = str.substring(0, str.length()-1);
         final String deviceId = str;
+        this.deviceId = deviceId;
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
         //原本放在上面，按下fab，Dialog設置此View後開啟，會將此View放在主畫面上
@@ -166,14 +167,12 @@ public class DeviceFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         deviceName = edtTxtDName.getText().toString();
-                        //deviceId = edtTxtDAddr.getText().toString();
-                        //deviceId ="CC:BB:CC:DD:EE:F"+mDeviceRVAdapter.getItemCount();
-                        //deviceId = "ww:aa:qq:ww:ww:ww";
+
                         mDeviceRVAdapter.setDeviceName(deviceName);
                         mDeviceRVAdapter.setDeviceAddr(deviceId);
                         mDeviceRVAdapter.notifyDataSetChanged();
 
-                        //new Thread(addUserDeviceRunnable).start();
+                        new Thread(addUserDeviceRunnable).start();
                     }
                 })
                 .setNegativeButton("取消", null)
@@ -195,38 +194,14 @@ public class DeviceFragment extends Fragment {
         addUserDeviceRunnable = new Runnable() {
             @Override
             public void run() {
-                //mMysqlConnect.addUserAndDevice(userId, deviceId, deviceName);
-
-                mDeviceRecyclerView.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        /*try {
-                            List<String> list = mDeviceRVAdapter.getRelayList();
-                            String str = mMysqlConnect.getResponse();
-                            //Toast.makeText(mContext, "re:"+list.size()+" str:"+mMysqlConnect.getResponse()+" "+str.length, Toast.LENGTH_SHORT).show();
-                            for(int i=0; i<list.size(); i++) {
-                                String strTemp = ""+str.charAt(i);
-                                list.set(i, strTemp);
-                            }
-                            mDeviceRVAdapter.setRelayList(list);
-                            mDeviceRVAdapter.notifyDataSetChanged();
-                            //Toast.makeText(mContext, "資料更新成功", Toast.LENGTH_SHORT).show();
-                        }catch (Exception e)
-                        {
-                            Log.d("Device分頁", "ERROR" + e.getMessage());
-                            //Toast.makeText(mContext, "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }*/
-
-                    }
-                },500);
+                mMysqlConnect.addUserAndDevice(userId, deviceId, deviceName);
             }
         };
 
         getUserDeviceRunnable = new Runnable() {
             @Override
             public void run() {
-                mMysqlConnect.getUserAndDevice(userId);//還沒實作
+                mMysqlConnect.getUserAndDevice(userId);
 
                 mDeviceRecyclerView.postDelayed(new Runnable() {
                     @Override

@@ -17,7 +17,7 @@ public class MqttAsyncHelper {
     private final String TAG = MqttAsyncHelper.class.getSimpleName();
 
     //MQTT Server
-    private final String serverUri = "tcp://megahouse.nctu.me";//  //140.130.35.239
+    private final String serverUri = "tcp://61.58.248.108";//  //140.130.35.239
 
     //訂閱
     private String subscriptionTopic = null;
@@ -61,6 +61,15 @@ public class MqttAsyncHelper {
     private MqttCallbackExtended mCallbackExtended = new MqttCallbackExtended() {
         @Override
         public void connectComplete(boolean reconnect, String serverURI) {
+            try {
+                String[] subscribeTopicsArray = new String[1];
+                subscribeTopicsArray[0] = subscriptionTopic;
+                mAsyncClient.subscribe(subscribeTopicsArray, mQos);
+            }catch (MqttException e){
+            Log.d("Mqtt Error", e.getMessage());
+            e.printStackTrace();
+            }
+
             mIMqttResponse.connectState(true);
             Log.d(TAG, "connectComplete from :" + serverURI);
         }
@@ -91,13 +100,13 @@ public class MqttAsyncHelper {
             asyncClient = new MqttAsyncClient(serverURI, clientId, persistence);
             asyncClient.setCallback(callback);
             asyncClient.connect(options);
-            while (!asyncClient.isConnected()){
+            /*while (!asyncClient.isConnected()){
                 Log.d("Phone", "RUNNING...");
             }
 
             String[] subscribeTopicsArray = new String[1];
             subscribeTopicsArray[0] = subscribeTopics;
-            asyncClient.subscribe(subscribeTopicsArray, qos);
+            asyncClient.subscribe(subscribeTopicsArray, qos);*/
 
         }catch (MqttException e){
             Log.d("Mqtt Error", e.getMessage());
