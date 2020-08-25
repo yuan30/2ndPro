@@ -3,6 +3,8 @@ package com.example.negativeion;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.negativeion.util.DeviceId;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -149,9 +151,9 @@ public class MqttAsyncHelper {
     public void build(){
         if (username != null && password != null && subscriptionTopic != null && publishTopic != null && mQos != null) {
             if (mAsyncClient == null) {
-                mAsyncClient = initClient(serverUri, clientId, mCallbackExtended, initMqttConnectOptions(), subscriptionTopic, mQos);
+                mAsyncClient = initClient(serverUri, DeviceId.getDeviceUUID(mContext), mCallbackExtended, initMqttConnectOptions(), subscriptionTopic, mQos);
             }else
-                mAsyncClient = initClient(serverUri, clientId, mCallbackExtended, initMqttConnectOptions(), subscriptionTopic, mQos);
+                mAsyncClient = initClient(serverUri, DeviceId.getDeviceUUID(mContext), mCallbackExtended, initMqttConnectOptions(), subscriptionTopic, mQos);
         } else {
             throw new NullPointerException();
         }

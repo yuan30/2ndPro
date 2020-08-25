@@ -1,0 +1,61 @@
+package com.example.negativeion.util;
+
+import android.content.Context;
+import android.os.Build;
+import android.provider.Settings;
+import android.text.TextUtils;
+
+import androidx.annotation.Nullable;
+
+import java.util.Random;
+import java.util.UUID;
+
+public class DeviceId {
+    public static String getDeviceUUID(Context context) {
+        String uuid = loadDeviceUUID(context);
+        if (TextUtils.isEmpty(uuid)) {
+            uuid = buildDeviceUUID(context);
+            saveDeviceUUID(context, uuid);
+        }
+        return uuid;
+    }
+
+    private static String buildDeviceUUID(Context context) {
+        String androidId = getAndroidId(context);
+        if ("9774d56d682e549c".equals(androidId)) {
+            Random random = new Random();
+            androidId = Integer.toHexString(random.nextInt())
+                    + Integer.toHexString(random.nextInt())
+                    + Integer.toHexString(random.nextInt());
+        }
+        return new UUID(androidId.hashCode(), getBuildInfo().hashCode()).toString();
+    }
+
+    private static void saveDeviceUUID(Context context, String uuid) {
+        context.getSharedPreferences("device_uuid", Context.MODE_PRIVATE)
+                .edit()
+                .putString("uuid", uuid)
+                .apply();
+    }
+
+    @Nullable
+    private static String loadDeviceUUID(Context context) {
+        return context.getSharedPreferences("device_uuid", Context.MODE_PRIVATE)
+                .getString("uuid", null);
+    }
+
+    private static String getAndroidId(Context context) {
+        return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+    }
+
+    private static String getBuildInfo() {
+        StringBuffer buildSB = new StringBuffer();
+        buildSB.append(Build.BRAND).append("/");
+        buildSB.append(Build.PRODUCT).append("/");
+        buildSB.append(Build.DEVICE).append("/");
+        buildSB.append(Build.ID).append("/");
+        buildSB.append(Build.VERSION.INCREMENTAL);
+        return buildSB.toString();
+//        return Build.FINGERPRINT;
+    }
+}

@@ -2,6 +2,7 @@ package com.example.negativeion.ui.pager;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -40,6 +41,8 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class RelayFragment extends Fragment implements IMqttResponse {
 
+    private View mView;
+    private Context mContext;
     private MqttAsyncHelper mMqttAsyncHelper;
     private MysqlConnect mMysqlConnect;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -66,7 +69,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_relay, container, false);
-
+        mContext = requireContext();
+        mView = view;
         mMysqlConnect = new MysqlConnect();
 
         mDeviceHandler = new Handler();
@@ -77,20 +81,19 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         try {
             deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
 
             mRelayRecyclerView = getView().findViewById(R.id.rv_relay);
             mRelayRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-            mRelayRVAdapter = new RelayRVAdapter(getContext());
+            mRelayRVAdapter = new RelayRVAdapter(mContext);
             mRelayRVAdapter.setOnItemClickListener(onItemClickListener);
             mRelayRVAdapter.OnCheckedChangeListener(onCheckedChangeListener);
             mRelayRecyclerView.setAdapter(mRelayRVAdapter);
             initRelayList();
         }catch (Exception e){
-            Toast.makeText(getContext(), "bug:"+e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "bug:"+e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -99,8 +102,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     public void onResume() {
         super.onResume();
         new Thread(relayConditionRunnable).start();
-        Snackbar.make(getView(), deviceId, Snackbar.LENGTH_SHORT).show();
-        Toast.makeText(getContext(), "更新資料中", Toast.LENGTH_SHORT).show();
+        //Snackbar.make(getView(), deviceId, Snackbar.LENGTH_SHORT).show();
+        Toast.makeText(mContext, "更新資料中", Toast.LENGTH_SHORT).show();
 
         //try {
         SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
@@ -116,17 +119,17 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         mqttConnect();
 
         if(bDeviceIsAlive) {
-            Toast.makeText(getContext(), "檢查裝置是否正常", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "檢查裝置是否正常", Toast.LENGTH_SHORT).show();
             mDeviceHandler.postDelayed(checkDeviceRunnable, 5000);
         }
         else
-            Toast.makeText(getContext(), "裝置異常，請稍等...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "裝置異常，請稍等...", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        //Toast.makeText(getContext(), "pause", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(mContext, "pause", Toast.LENGTH_SHORT).show();
         SharedPreferences appSharedPrefs = getActivity().
                 getSharedPreferences("negative_relay",MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
@@ -179,9 +182,9 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         @Override
         public void onItemLongClick(View view, int position, String string) {
 
-            LayoutInflater inflater = LayoutInflater.from(getContext());
+            LayoutInflater inflater = LayoutInflater.from(mContext);
             final View v = inflater.inflate(R.layout.dialog_alter_relay_name, null);
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             final EditText edtTxtRName = v.findViewById(R.id.edtTxtRName);
             edtTxtRName.setText(mRelayRVAdapter.getRelayNameList().get(position));
             final List list = mRelayRVAdapter.getRelayNameList();
@@ -213,18 +216,18 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                         try {
                             List<String> list = mRelayRVAdapter.getRelayList();
                             String str = mMysqlConnect.getResponse();
-                            //Toast.makeText(getContext(), "re:"+list.size()+" str:"+mMysqlConnect.getResponse()+" "+str.length, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(mContext, "re:"+list.size()+" str:"+mMysqlConnect.getResponse()+" "+str.length, Toast.LENGTH_SHORT).show();
                             for(int i=0; i<list.size(); i++) {
                                 String strTemp = ""+str.charAt(i);
                                 list.set(i, strTemp);
                             }
                             mRelayRVAdapter.setRelayList(list);
                             mRelayRVAdapter.notifyDataSetChanged();
-                            //Toast.makeText(getContext(), "資料更新成功", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(mContext, "資料更新成功", Toast.LENGTH_SHORT).show();
                         }catch (Exception e)
                         {
                             Log.d("Device分頁", "ERROR" + e.getMessage());
-                            //Toast.makeText(getContext(), "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(mContext, "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -246,7 +249,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 mRelayRecyclerView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        //Toast.makeText(getContext(), "MAC:"+deviceId, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(mContext, "MAC:"+deviceId, Toast.LENGTH_SHORT).show();
                         //Log.d("POST Test", "body:" + mMysqlConnect.getResponse());
                     }
                 },500);
@@ -257,8 +260,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             @Override
             public void run() {
                 if(bDeviceIsAlive) {
-                    Toast.makeText(getContext(), "裝置異常，請稍等...", Toast.LENGTH_LONG).show();
-
+                    //Toast.makeText(mContext, "裝置異常，請稍等...", Toast.LENGTH_LONG).show();
+                    Snackbar.make(mView, "裝置異常，請稍等...", Snackbar.LENGTH_SHORT).show();
                     bDeviceIsAlive = false;
                     /*for (int i = 0; i < mRelayRVAdapter.getRelayList().size(); i++)
                         mRelayRVAdapter.getRelayList().set(i, "0");*/
@@ -266,8 +269,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                     mRelayRVAdapter.notifyDataSetChanged();
 
                 }else {
-                    Toast.makeText(getContext(), "裝置重連中，請稍等...", Toast.LENGTH_SHORT).show();
-
+                    //Toast.makeText(mContext, "裝置重連中，請稍等...", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(mView, "裝置重連中，請稍等...", Snackbar.LENGTH_SHORT).show();
                     bDeviceIsAlive = true;
                     mRelayRVAdapter.resetItemLayout();
                     new Thread(relayConditionRunnable).start();
@@ -280,7 +283,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     public void mqttConnect()
     {
         if (mMqttAsyncHelper == null) {
-            mMqttAsyncHelper = new MqttAsyncHelper(getContext(),RelayFragment.this);
+            mMqttAsyncHelper = new MqttAsyncHelper(mContext,RelayFragment.this);
             mMqttAsyncHelper.setUsername("1")
                     .setPassword("")
                     .setClientId(deviceId)
