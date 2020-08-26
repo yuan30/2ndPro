@@ -103,7 +103,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         super.onResume();
         new Thread(relayConditionRunnable).start();
         //Snackbar.make(getView(), deviceId, Snackbar.LENGTH_SHORT).show();
-        Toast.makeText(mContext, "更新資料中", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(mContext, "更新資料中", Toast.LENGTH_SHORT).show();
 
         //try {
         SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
@@ -120,7 +120,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
 
         if(bDeviceIsAlive) {
             Toast.makeText(mContext, "檢查裝置是否正常", Toast.LENGTH_SHORT).show();
-            mDeviceHandler.postDelayed(checkDeviceRunnable, 5000);
+            mDeviceHandler.postDelayed(checkDeviceRunnable, 2500);
         }
         else
             Toast.makeText(mContext, "裝置異常，請稍等...", Toast.LENGTH_SHORT).show();
@@ -343,10 +343,10 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 //mTxtReceive.setText(mTxtReceive.getText().toString() + "\n" +msg.obj.toString());
                 mDeviceHandler.removeCallbacks(checkDeviceRunnable);
                 if(bDeviceIsAlive)
-                    mDeviceHandler.postDelayed(checkDeviceRunnable, 5000);
+                    mDeviceHandler.postDelayed(checkDeviceRunnable, 2500);
                 else {
                     mDeviceHandler.post(checkDeviceRunnable);
-                    mDeviceHandler.postDelayed(checkDeviceRunnable, 5000);
+                    mDeviceHandler.postDelayed(checkDeviceRunnable, 2500);
                 }
             }else if(msg.arg1 == 3){
                 //mTxtSend.setText(msg.obj.toString());
