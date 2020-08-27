@@ -291,7 +291,9 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
         public void onClick(DialogInterface dialog, int which) {
             Intent intent = new Intent(SmartConfigActivity.this, MainActivity.class);
             intent.putExtra(Attribute.DEVICE_ID, sResultBssid);
-            startActivity(intent);
+            setResult(RESULT_OK, intent);
+
+            finish();
         }
     };
 }

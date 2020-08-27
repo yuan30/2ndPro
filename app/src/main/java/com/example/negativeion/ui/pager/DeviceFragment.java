@@ -27,6 +27,8 @@ import com.example.negativeion.espsmartconfig.v1.SmartConfigActivity;
 import com.example.negativeion.model.UserAndDeviceModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import static android.app.Activity.RESULT_OK;
+
 public class DeviceFragment extends Fragment {
 
     private Context mContext;
@@ -36,7 +38,7 @@ public class DeviceFragment extends Fragment {
 
     private FloatingActionButton fabAddDevice;
     private Runnable addUserDeviceRunnable, getUserDeviceRunnable;
-    private String userId="1321545600123", deviceName, deviceId;
+    private String userId, deviceName, deviceId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,6 +64,8 @@ public class DeviceFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         try {
+            userId = getActivity().getIntent().getStringExtra(Attribute.USER_ID);
+
             mDeviceRecyclerView = getView().findViewById(R.id.rv_device);
             mDeviceRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
 
@@ -80,7 +84,7 @@ public class DeviceFragment extends Fragment {
         super.onStart();
 
         new Thread(getUserDeviceRunnable).start();
-        String str = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
+        /*String str = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
         if((str != null) && (str.compareTo("-1") != 0))
             addDevice(str);
 
@@ -93,12 +97,13 @@ public class DeviceFragment extends Fragment {
         Log.d("DeviceFragment/deviceId","D長度" + deviceIdTemp.length());
         Log.d("DeviceFragment/deviceId","長度" + deviceIdTemp.split("").length);
         Log.d("DeviceFragment/deviceId","長度" + str1);
-        final String deviceId = str1;
+        final String deviceId = str1;*/
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
         /*Toast.makeText(mContext, "Id:" + getActivity().getIntent().getStringExtra(Attribute.USER_ID), Toast.LENGTH_SHORT)
                 .show();*/
         //userId = getActivity().getIntent().getStringExtra("User ID");
@@ -132,11 +137,28 @@ public class DeviceFragment extends Fragment {
         prefsEditor.apply();*/
     }
 
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode != Attribute.RECEIVED_DEIVCE_ID_CODE)
+            return;
+
+        switch (resultCode){
+            case RESULT_OK:
+                String str = data.getStringExtra(Attribute.DEVICE_ID);
+                if((str != null) && (str.compareTo("-1") != 0))
+                    addDevice(str);
+                break;
+        }
+    }
+
     private void initView()
     {
         fabAddDevice.setOnClickListener(v -> { //lambda 語法 need java 1.8
             Intent intent = new Intent(mContext, SmartConfigActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, Attribute.RECEIVED_DEIVCE_ID_CODE);
         });
     }
 
@@ -179,6 +201,7 @@ public class DeviceFragment extends Fragment {
                 .show();
         getActivity().getIntent().putExtra(Attribute.DEVICE_ID, "-1");
     }
+
     private DeviceRVAdapter.OnItemClickListener onItemClickListener = new DeviceRVAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {
@@ -187,6 +210,26 @@ public class DeviceFragment extends Fragment {
             intent.putExtra(Attribute.DEVICE_ID, deviceId);
             //Toast.makeText(mContext, "D_MAC:"+deviceId,Toast.LENGTH_SHORT).show();
             startActivity(intent);
+        }
+
+        @Override
+        public void onItemLongClick(View view, int position) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle("刪除裝置")
+                    .setMessage("是否刪除裝置?")
+                    .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setTitle("確定")
+                                    .setMessage("確定刪除?")
+                                    .setPositiveButton("確定", null)
+                                    .setNegativeButton("取消", null)
+                                    .show();
+                        }
+                    })
+                    .setNeutralButton("否", null)
+                    .show();
         }
     };
 

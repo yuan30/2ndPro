@@ -13,7 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHolder> implements View.OnClickListener{
+public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHolder> implements View.OnClickListener
+    , View.OnLongClickListener{
 
 
     private List<String> deviceNameList;
@@ -37,6 +38,7 @@ public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHo
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_device_item, parent, false);
 
         view.setOnClickListener(this);
+        view.setOnLongClickListener(this); //if want to use listener in self.
         ViewHolder viewHolder = new ViewHolder(view);
         view.setTag(viewHolder);
         return viewHolder;
@@ -49,14 +51,24 @@ public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHo
         holder.mDeviceIcon.setImageResource(deviceIcon);
     }
 
-    public interface OnItemClickListener {
-        void onItemClick(View view, int position);
-    }
     @Override
     public void onClick(View view) {
         if(mOnItemClickListener != null){
             mOnItemClickListener.onItemClick(view, (int)view.getTag());
         }
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        if(mOnItemClickListener != null){
+            mOnItemClickListener.onItemLongClick(view,(int)view.getTag());
+        }
+        return false;
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
+        void onItemLongClick(View view, int position);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -69,16 +81,6 @@ public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHo
             mDeviceTitle = itemView.findViewById(R.id.deviceTitle);
             mDeviceIcon = itemView.findViewById(R.id.deviceIcon);
         }
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return super.getItemId(position);
-    }
-
-    @Override
-    public int getItemCount() {
-        return deviceNameList.size();
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -104,6 +106,16 @@ public class DeviceRVAdapter extends RecyclerView.Adapter<DeviceRVAdapter.ViewHo
 
     public String getDeviceAddr(int position) {
        return this.deviceAddrList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return super.getItemId(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return deviceNameList.size();
     }
 
     public void removeAllDatas() {
