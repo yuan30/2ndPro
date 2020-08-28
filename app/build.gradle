@@ -8,7 +8,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
-        versionName "0.6.13"
+        versionName "0.7.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -43,6 +43,8 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
     // Dependency for Google Sign-In
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
+    //Costom Google Sign-In
+    implementation 'com.shobhitpuri.custombuttons:google-signin:1.1.0'
     //mqtt
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.1'
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'

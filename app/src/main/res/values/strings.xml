@@ -6,6 +6,7 @@
     <string name="help_ap_password">Type in WiFi password</string>
     <!-- Sign-in status messages -->
     <string name="sign_in">Sign in</string>
+    <string name="sign_in_button">Sign in with Google</string>
     <string name="signed_in_fmt">Signed in as: %s</string>
     <string name="signed_in">Signed in</string>
     <string name="signing_in">Signing in…</string>

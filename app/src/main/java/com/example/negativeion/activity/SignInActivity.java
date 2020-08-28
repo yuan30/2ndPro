@@ -24,7 +24,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -34,7 +33,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
+
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -64,9 +63,10 @@ public class SignInActivity extends AppCompatActivity  implements
         mImageView.setImageResource(R.drawable.member);
 
         /** Google sign in*/
-        // Set the dimensions of the sign-in button.
-        SignInButton signInButton = findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
+        // Doesn't need to set the dimensions of the sign-in button.
+        // Use the sign-in button of the other developers.
+        //SignInButton signInButton = findViewById(R.id.sign_in_button);
+        //signInButton.setSize(SignInButton.SIZE_STANDARD);
 
         // [START configure_signin]
         // Configure sign-in to request the user's ID, email address, and basic
@@ -82,7 +82,6 @@ public class SignInActivity extends AppCompatActivity  implements
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         // [END build_client]
         findViewById(R.id.sign_in_button).setOnClickListener(this);
-        findViewById(R.id.button_sign_out).setOnClickListener(this);
     }
 
     @Override
@@ -193,7 +192,6 @@ public class SignInActivity extends AppCompatActivity  implements
             if(signInStatusCode == GoogleSignInStatusCodes.NETWORK_ERROR)
                 Toast.makeText(this, "請連上網路", Toast.LENGTH_SHORT).show();
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.button_sign_out).setVisibility(View.GONE);
         }
     }
 
@@ -202,9 +200,6 @@ public class SignInActivity extends AppCompatActivity  implements
         switch (v.getId()) {
             case R.id.sign_in_button:
                 signIn();
-                break;
-            case R.id.button_sign_out:
-                signOut();
                 break;
         }
     }

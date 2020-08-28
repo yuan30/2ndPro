@@ -53,23 +53,15 @@
         android:layout_weight="2"
         android:background="@color/blue_grey_900">
 
-        <com.google.android.gms.common.SignInButton
+        <com.shobhitpuri.custombuttons.GoogleSignInButton
             android:id="@+id/sign_in_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/button_sign_out"
             android:layout_centerInParent="true"
+            android:text="@string/sign_in_button"
             android:visibility="visible">
 
-        </com.google.android.gms.common.SignInButton>
-
-        <Button
-            android:id="@+id/button_sign_out"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_marginBottom="10sp"
-            android:text="登出" />
+        </com.shobhitpuri.custombuttons.GoogleSignInButton>
 
     </RelativeLayout>
 
