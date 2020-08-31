@@ -37,7 +37,7 @@ public class DeviceFragment extends Fragment {
     private RecyclerView mDeviceRecyclerView;
 
     private FloatingActionButton fabAddDevice;
-    private Runnable addUserDeviceRunnable, getUserDeviceRunnable;
+    private Runnable addUserDeviceRunnable, getUserDeviceRunnable, deleteDeviceRunnable;
     private String userId, deviceName, deviceId;
 
     @Override
@@ -214,22 +214,45 @@ public class DeviceFragment extends Fragment {
 
         @Override
         public void onItemLongClick(View view, int position) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setTitle("刪除裝置")
-                    .setMessage("是否刪除裝置?")
-                    .setPositiveButton("是", new DialogInterface.OnClickListener() {
+            deviceId = mDeviceRVAdapter.getDeviceAddr(position);
+            AlertDialog.Builder Builder = new AlertDialog.Builder(mContext);
+            Builder.setTitle("選擇動作")
+                    .setPositiveButton("刪除裝置", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    AlertDialog.Builder delBuilder = new AlertDialog.Builder(mContext);
+                                    delBuilder.setTitle("刪除裝置")
+                                            .setMessage("是否刪除裝置?")
+                                            .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    AlertDialog.Builder checkBuilder = new AlertDialog.Builder(mContext);
+                                                    checkBuilder.setTitle("確定")
+                                                            .setMessage("確定刪除?")
+                                                            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(DialogInterface dialog, int which) {
+                                                                    new Thread(deleteDeviceRunnable).start();
+                                                                }
+                                                            })
+                                                            .setNegativeButton("取消", null)
+                                                            .show();
+                                                }
+                                            })
+                                            .setNeutralButton("否", null)
+                                            .show();
+                                }
+                            })
+                    .setNegativeButton("修改名稱", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setTitle("確定")
-                                    .setMessage("確定刪除?")
-                                    .setPositiveButton("確定", null)
-                                    .setNegativeButton("取消", null)
-                                    .show();
+
                         }
                     })
-                    .setNeutralButton("否", null)
+                    .setNeutralButton("取消", null)
                     .show();
+
+
         }
     };
 
@@ -238,6 +261,7 @@ public class DeviceFragment extends Fragment {
             @Override
             public void run() {
                 mMysqlConnect.addUserAndDevice(userId, deviceId, deviceName);
+                deviceId = "";
             }
         };
 
@@ -262,6 +286,14 @@ public class DeviceFragment extends Fragment {
                             e.printStackTrace();}
                     }
                 },10);
+            }
+        };
+
+        deleteDeviceRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mMysqlConnect.deleteDevice(deviceId);
+                deviceId = "";
             }
         };
     }

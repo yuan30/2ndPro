@@ -38,20 +38,27 @@ public class MysqlConnect {
     private List<NegativeIonModel> topicDatas = null;
     private List<Temperature2Model> topicTemperatureDatas = null;
     private List<UserAndDeviceModel> topicUserAndDeviceDatas = null;
-    //OkHttpClient client;
+
+    private OkHttpClient client;
 
     public MysqlConnect(){
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        /*if (BuildConfig.DEBUG) {
+            // development build
+            logging.setLevel(Level.BODY);
+        } else {
+            // production build
+            logging.setLevel(Level.BASIC);
+        }*/
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
+        client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
     }
 
     public void CONN(){ //連上getDataV2.php，拿到頁面上的資料表的資料
         resStr = "";
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build();
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("index", ""+index)
@@ -96,12 +103,6 @@ public class MysqlConnect {
     }
 
     public void connectTemperature(){ //拿到雙溫度感測器的資料
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build();
 
         Request request = new Request.Builder()
                 .url("https://www.usblab.nctu.me/40643230test/php/getTEMP.php?index=0")
@@ -126,13 +127,6 @@ public class MysqlConnect {
 
     public void addUserAndDevice(String userId, String deviceId, String deviceName){
 
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build();
-
         FormBody.Builder params = new FormBody.Builder();
         params.add(Attribute.USER_ID, userId);
         params.add(Attribute.DEVICE_ID, deviceId);
@@ -145,19 +139,45 @@ public class MysqlConnect {
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            resStr = response.body().string() ;//+ "\n" + response.toString();
+            resStr = response.body().string();//+ "\n" + response.toString();
             //String[] c=resStr.split("");
         }catch (IOException e){e.printStackTrace(); resStr = "GG";}
     }
 
-    public void updateRelay(String deviceId){//之後由這送電源開跟關去資料庫1
+    public void modifyDeviceName( String deviceId, String deviceName){
 
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        FormBody.Builder params = new FormBody.Builder();
+        params.add(Attribute.DEVICE_ID, deviceId);
+        params.add(Attribute.DEVICE_NAME, deviceName);
+        RequestBody formBody = params.build();
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
+        Request request = new Request.Builder()
+                .url("https://www.usblab.nctu.me/40643230test/php/pdo/addUserDeviceTest.php")
+                .method("POST", formBody)
                 .build();
+        try {
+            Response response = client.newCall(request).execute();
+            resStr = response.body().string();
+        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
+    }
+
+    public void deleteDevice(String deviceId){
+
+        FormBody.Builder params = new FormBody.Builder();
+        params.add(Attribute.DEVICE_ID, deviceId);
+        RequestBody formBody = params.build();
+
+        Request request = new Request.Builder()
+                .url("https://www.usblab.nctu.me/40643230test/php/pdo/delDevice.php")
+                .method("POST", formBody)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            resStr = response.body().string();
+        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
+    }
+
+    public void updateRelay(String deviceId){//之後由這送電源開跟關去資料庫1
 
         FormBody.Builder params = new FormBody.Builder();
         params.add(Attribute.DEVICE_ID, deviceId);
@@ -181,13 +201,6 @@ public class MysqlConnect {
 
     public void getRelayCondition(String deviceId){
 
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build();
-
         RequestBody requestBody = new FormBody.Builder()
                 .add(Attribute.DEVICE_ID, deviceId)
                 .build();
@@ -207,13 +220,6 @@ public class MysqlConnect {
     }
 
     public void getUserAndDevice(String userId){
-
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build();
 
         RequestBody requestBody =  new FormBody.Builder()
                 .add(Attribute.USER_ID, userId)
@@ -270,57 +276,4 @@ public class MysqlConnect {
     public void setRelay(int relay) {
         this.relay = relay;
     }
-/*
-    public boolean init(){
-        try{
-            Class.forName("com.mysql.jdbc.Driver");
-            Log.d(TAG,"加載驅動成功");
-        }catch (ClassNotFoundException e){
-            Log.d(TAG,"加載驅動失敗");
-        }
-        try {
-            Connection connection = DriverManager.getConnection(mysql_url, mysql_user, mysql_password);
-            Log.d(TAG,"遠端連接成功");
-        }catch (SQLException e){
-            Log.d(TAG,"遠端連接失敗");
-            return false;
-        }
-        return true;
-    }
-
-    public String jdbcGetData() {
-        String data = "";
-        try {
-            Connection connection = DriverManager.getConnection(mysql_url, mysql_user, mysql_password);
-            String sql = "SELECT * FROM relay";
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
-            while (resultSet.next())
-            {
-                String id = resultSet.getString("id");
-                String name = resultSet.getString("relay");
-                data += id + ", " + name + "\n";
-            }
-            statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return data;
-    }
-
-    public String jdbcAddRelay() {
-        String str = "";
-        try {
-            Connection connection = DriverManager.getConnection(mysql_url, mysql_user, mysql_password);
-            String sql = "INSERT INTO relay (relay) VALUES (0)";
-            Statement statement = connection.createStatement();
-            statement.executeQuery(sql);
-            statement.close();
-            str = "資料寫入成功";
-        } catch (SQLException e) {
-            e.printStackTrace();
-            str = "資料寫入失敗:" + e.toString();
-        }
-        return str;
-    }*/
 }
