@@ -4,6 +4,25 @@
     <string name="hint_device_name">Device name</string>
     <string name="hint_ap_password">Password</string>
     <string name="help_ap_password">Type in WiFi password</string>
+
+    <!-- AlertDialog messages -->
+    <string name="add_device">Add a new device</string>
+    <string name="add">add</string>
+
+    <string name="choice_action">Choice action</string>
+
+    <string name="modify">Modify</string>
+    <string name="modify_device_name">modify device name</string>
+    <string name="modify_relay_name">modify relay name</string>
+
+    <string name="delete_device">Delete</string>
+    <string name="check_once">Delete device, yes or no?</string>
+    <string name="check_twice">Are you sure?</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
     <!-- Sign-in status messages -->
     <string name="sign_in">Sign in</string>
     <string name="sign_in_button">Sign in with Google</string>

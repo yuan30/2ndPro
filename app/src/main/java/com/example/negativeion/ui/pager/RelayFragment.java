@@ -183,16 +183,16 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         public void onItemLongClick(View view, int position, String string) {
 
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            final View v = inflater.inflate(R.layout.dialog_alter_relay_name, null);
+            final View v = inflater.inflate(R.layout.dialog_alter_device_n_relay_name, null);
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            final EditText edtTxtRName = v.findViewById(R.id.edtTxtRName);
+            final EditText edtTxtRName = v.findViewById(R.id.edtTxtDnRName);
             edtTxtRName.setText(mRelayRVAdapter.getRelayNameList().get(position));
             final List list = mRelayRVAdapter.getRelayNameList();
             final int pos = position;
-            builder.setTitle("修改繼電器名稱")
+            builder.setTitle(R.string.modify_relay_name)
                     .setView(v)
                     .setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             list.set(pos, edtTxtRName.getText().toString());

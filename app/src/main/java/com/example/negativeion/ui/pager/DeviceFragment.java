@@ -37,7 +37,8 @@ public class DeviceFragment extends Fragment {
     private RecyclerView mDeviceRecyclerView;
 
     private FloatingActionButton fabAddDevice;
-    private Runnable addUserDeviceRunnable, getUserDeviceRunnable, deleteDeviceRunnable;
+    private Runnable addUserDeviceRunnable, getUserDeviceRunnable
+            , deleteDeviceRunnable, modeifyDeviceRunnable;
     private String userId, deviceName, deviceId;
 
     @Override
@@ -112,7 +113,7 @@ public class DeviceFragment extends Fragment {
 
         /*SharedPreferences appSharedPrefs  = Objects.requireNonNull(getActivity()).
                 getSharedPreferences("negative_relay",MODE_PRIVATE);
-        List<String> list = mDeviceRVAdapter.getRelayNameList();
+        List<String> list = mDeviceRVAdapter.getDeviceName()();
         for(int i = 0; i<list.size(); i++){
             list.set(i, appSharedPrefs.getString(Integer.toString(i), "編號0"+i));
         }*/
@@ -130,7 +131,7 @@ public class DeviceFragment extends Fragment {
                 getSharedPreferences("negative_relay",MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
         prefsEditor.clear();
-        List<String> list = mDeviceRVAdapter.getRelayNameList();
+        List<String> list = mDeviceRVAdapter.getDeviceName()();
         for(int i = 0; i<list.size(); i++){
             prefsEditor.putString(Integer.toString(i), list.get(i));
         }
@@ -182,10 +183,10 @@ public class DeviceFragment extends Fragment {
         //mDeviceRVAdapter.setDeviceAddr();
         Toast.makeText(mContext, "MAC:" + deviceIdTemp, Toast.LENGTH_LONG).show();
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle("新增裝置")
+        builder.setTitle(R.string.add_device)
                 .setView(addDeviceView)
                 .setCancelable(false)
-                .setPositiveButton("新增", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         deviceName = edtTxtDName.getText().toString();
@@ -197,7 +198,7 @@ public class DeviceFragment extends Fragment {
                         new Thread(addUserDeviceRunnable).start();
                     }
                 })
-                .setNegativeButton("取消", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show();
         getActivity().getIntent().putExtra(Attribute.DEVICE_ID, "-1");
     }
@@ -216,40 +217,58 @@ public class DeviceFragment extends Fragment {
         public void onItemLongClick(View view, int position) {
             deviceId = mDeviceRVAdapter.getDeviceAddr(position);
             AlertDialog.Builder Builder = new AlertDialog.Builder(mContext);
-            Builder.setTitle("選擇動作")
-                    .setPositiveButton("刪除裝置", new DialogInterface.OnClickListener() {
+            Builder.setTitle(R.string.choice_action)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.delete_device, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     AlertDialog.Builder delBuilder = new AlertDialog.Builder(mContext);
-                                    delBuilder.setTitle("刪除裝置")
-                                            .setMessage("是否刪除裝置?")
-                                            .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                                    delBuilder
+                                            .setMessage(R.string.check_once)
+                                            .setCancelable(false)
+                                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     AlertDialog.Builder checkBuilder = new AlertDialog.Builder(mContext);
-                                                    checkBuilder.setTitle("確定")
-                                                            .setMessage("確定刪除?")
-                                                            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                                                    checkBuilder.setTitle(R.string.ok)
+                                                            .setCancelable(false)
+                                                            .setMessage(R.string.check_twice)
+                                                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                                                 @Override
                                                                 public void onClick(DialogInterface dialog, int which) {
                                                                     new Thread(deleteDeviceRunnable).start();
                                                                 }
                                                             })
-                                                            .setNegativeButton("取消", null)
+                                                            .setNegativeButton(R.string.cancel, null)
                                                             .show();
                                                 }
                                             })
-                                            .setNeutralButton("否", null)
+                                            .setNeutralButton(R.string.no, null)
                                             .show();
                                 }
                             })
-                    .setNegativeButton("修改名稱", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(R.string.modify, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            LayoutInflater inflater = LayoutInflater.from(mContext);
+                            final View v = inflater.inflate(R.layout.dialog_alter_device_n_relay_name, null);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            final EditText edtTxtRName = v.findViewById(R.id.edtTxtDnRName);
+                            edtTxtRName.setText(mDeviceRVAdapter.getDeviceName(position));
 
+                            builder.setTitle(R.string.modify_device_name)
+                                    .setView(v)
+                                    .setCancelable(false)
+                                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            deviceName =  edtTxtRName.getText().toString();
+                                            new Thread(modeifyDeviceRunnable).start();
+                                        }
+                                    }).show();
                         }
                     })
-                    .setNeutralButton("取消", null)
+                    .setNeutralButton(R.string.cancel, null)
                     .show();
 
 
@@ -293,6 +312,14 @@ public class DeviceFragment extends Fragment {
             @Override
             public void run() {
                 mMysqlConnect.deleteDevice(deviceId);
+                deviceId = "";
+            }
+        };
+
+        modeifyDeviceRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mMysqlConnect.modifyDeviceName(deviceId, deviceName);
                 deviceId = "";
             }
         };
