@@ -10,7 +10,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +38,8 @@ public class DeviceFragment extends Fragment {
     private DeviceRVAdapter mDeviceRVAdapter;
     private RecyclerView mDeviceRecyclerView;
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     private FloatingActionButton fabAddDevice;
     private Runnable addUserDeviceRunnable, getUserDeviceRunnable
             , deleteDeviceRunnable, modeifyDeviceRunnable;
@@ -51,12 +55,10 @@ public class DeviceFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_device, container, false);
         mContext = requireContext();
-        fabAddDevice = view.findViewById(R.id.fabAddDevice);
 
         mMysqlConnect = new MysqlConnect();
 
-        initView();
-        initRunnable();
+
         return view;
     }
 
@@ -67,17 +69,46 @@ public class DeviceFragment extends Fragment {
         try {
             userId = getActivity().getIntent().getStringExtra(Attribute.USER_ID);
 
-            mDeviceRecyclerView = getView().findViewById(R.id.rv_device);
-            mDeviceRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
-
-            mDeviceRVAdapter = new DeviceRVAdapter(mContext);
-            mDeviceRVAdapter.setOnItemClickListener(onItemClickListener);
-
-            mDeviceRecyclerView.setAdapter(mDeviceRVAdapter);
+            initView();
+            initRunnable();
         }catch (Exception e){
             Toast.makeText(mContext, "bug:"+e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
 
+    private void initView()
+    {
+        fabAddDevice = getView().findViewById(R.id.fabAddDevice);
+        fabAddDevice.setOnClickListener(v -> { //lambda 語法 need java 1.8
+            Intent intent = new Intent(mContext, SmartConfigActivity.class);
+            startActivityForResult(intent, Attribute.RECEIVED_DEIVCE_ID_CODE);
+        });
+
+        mDeviceRecyclerView = getView().findViewById(R.id.rv_device);
+        mDeviceRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
+
+        mDeviceRVAdapter = new DeviceRVAdapter(mContext);
+        mDeviceRVAdapter.setOnItemClickListener(onItemClickListener);
+
+        mDeviceRecyclerView.setAdapter(mDeviceRVAdapter);
+
+        /*
+         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+         * performs a swipe-to-refresh gesture.
+         */
+        mSwipeRefreshLayout = getView().findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        //Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout");
+
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        updateOperation();
+                    }
+                }
+        );
     }
 
     @Override
@@ -85,59 +116,17 @@ public class DeviceFragment extends Fragment {
         super.onStart();
 
         new Thread(getUserDeviceRunnable).start();
-        /*String str = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
-        if((str != null) && (str.compareTo("-1") != 0))
-            addDevice(str);
-
-        String deviceIdTemp="6001942cd7a6";
-        String str1 = "";
-        for(int i=0; i<deviceIdTemp.length(); i=i+2)
-            str1 = str1 + deviceIdTemp.substring(i, i+2) + ":";
-        str1 = str1.substring(0, str1.length()-1);
-
-        Log.d("DeviceFragment/deviceId","D長度" + deviceIdTemp.length());
-        Log.d("DeviceFragment/deviceId","長度" + deviceIdTemp.split("").length);
-        Log.d("DeviceFragment/deviceId","長度" + str1);
-        final String deviceId = str1;*/
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
-        /*Toast.makeText(mContext, "Id:" + getActivity().getIntent().getStringExtra(Attribute.USER_ID), Toast.LENGTH_SHORT)
-                .show();*/
-        //userId = getActivity().getIntent().getStringExtra("User ID");
-
-        //Toast.makeText(mContext, "更新資料中", Toast.LENGTH_SHORT).show();
-
-        /*SharedPreferences appSharedPrefs  = Objects.requireNonNull(getActivity()).
-                getSharedPreferences("negative_relay",MODE_PRIVATE);
-        List<String> list = mDeviceRVAdapter.getDeviceName()();
-        for(int i = 0; i<list.size(); i++){
-            list.set(i, appSharedPrefs.getString(Integer.toString(i), "編號0"+i));
-        }*/
-        //mDeviceRVAdapter.setRelayNameList(list);
-        //mDeviceRVAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        //mDeviceRVAdapter.removeAllDatas();
-        //Toast.makeText(mContext, "pause", Toast.LENGTH_SHORT).show();
-       /* SharedPreferences appSharedPrefs = getActivity().
-                getSharedPreferences("negative_relay",MODE_PRIVATE);
-        SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
-        prefsEditor.clear();
-        List<String> list = mDeviceRVAdapter.getDeviceName()();
-        for(int i = 0; i<list.size(); i++){
-            prefsEditor.putString(Integer.toString(i), list.get(i));
-        }
-        prefsEditor.apply();*/
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -153,14 +142,6 @@ public class DeviceFragment extends Fragment {
                     addDevice(str);
                 break;
         }
-    }
-
-    private void initView()
-    {
-        fabAddDevice.setOnClickListener(v -> { //lambda 語法 need java 1.8
-            Intent intent = new Intent(mContext, SmartConfigActivity.class);
-            startActivityForResult(intent, Attribute.RECEIVED_DEIVCE_ID_CODE);
-        });
     }
 
     private void addDevice(String deviceIdTemp)
@@ -237,6 +218,7 @@ public class DeviceFragment extends Fragment {
                                                                 @Override
                                                                 public void onClick(DialogInterface dialog, int which) {
                                                                     new Thread(deleteDeviceRunnable).start();
+                                                                    manualRefresh();
                                                                 }
                                                             })
                                                             .setNegativeButton(R.string.cancel, null)
@@ -264,6 +246,7 @@ public class DeviceFragment extends Fragment {
                                         public void onClick(DialogInterface dialog, int which) {
                                             deviceName =  edtTxtRName.getText().toString();
                                             new Thread(modeifyDeviceRunnable).start();
+                                            manualRefresh();
                                         }
                                     }).show();
                         }
@@ -274,6 +257,17 @@ public class DeviceFragment extends Fragment {
 
         }
     };
+
+    private void manualRefresh()
+    {
+        mSwipeRefreshLayout.setRefreshing(true);
+        updateOperation();
+    }
+
+    private void updateOperation()
+    {
+        new Thread(getUserDeviceRunnable).start();
+    }
 
     void initRunnable(){
         addUserDeviceRunnable = new Runnable() {
@@ -292,7 +286,7 @@ public class DeviceFragment extends Fragment {
                 mDeviceRecyclerView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-
+                        mDeviceRVAdapter.removeAllDatas();
                         try {
                             for (UserAndDeviceModel userAndDeviceModel : mMysqlConnect.getUserAndDeviceModelList()) {
                                 //以位址做判斷，名稱重複沒關係
@@ -303,6 +297,8 @@ public class DeviceFragment extends Fragment {
                         }catch (Exception e){Toast.makeText(mContext, "系統目前出錯，請稍後再試", Toast.LENGTH_SHORT).show();
                             Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
                             e.printStackTrace();}
+
+                        mSwipeRefreshLayout.setRefreshing(false);
                     }
                 },10);
             }
