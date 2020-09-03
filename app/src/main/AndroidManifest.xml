@@ -21,7 +21,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".activity.SignInActivity">
+        <activity android:name=".activity.SignInActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,11 +34,12 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
 
-        <activity android:name=".activity.MainActivity" />
+        <activity android:name=".activity.MainActivity" android:screenOrientation="portrait"/>
 
-        <activity android:name=".activity.RelayActivity" />
+        <activity android:name=".activity.RelayActivity" android:screenOrientation="portrait"/>
 
-        <activity android:name=".espsmartconfig.v1.SmartConfigActivity" />
+        <activity android:name=".espsmartconfig.v1.SmartConfigActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
