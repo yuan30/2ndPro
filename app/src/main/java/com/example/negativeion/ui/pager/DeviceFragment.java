@@ -115,7 +115,7 @@ public class DeviceFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        new Thread(getUserDeviceRunnable).start();
+        manualRefresh();
     }
 
     @Override
@@ -292,8 +292,8 @@ public class DeviceFragment extends Fragment {
                                 //以位址做判斷，名稱重複沒關係
                                 if (mDeviceRVAdapter.setDeviceAddr(userAndDeviceModel.getDeviceId()))
                                     mDeviceRVAdapter.setDeviceName(userAndDeviceModel.getDeviceName());
-                                mDeviceRVAdapter.notifyDataSetChanged();
                             }
+                            mDeviceRVAdapter.notifyDataSetChanged();
                         }catch (Exception e){Toast.makeText(mContext, "系統目前出錯，請稍後再試", Toast.LENGTH_SHORT).show();
                             Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
                             e.printStackTrace();}

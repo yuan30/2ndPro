@@ -120,7 +120,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
 
         if(bDeviceIsAlive) {
             Toast.makeText(mContext, "檢查裝置是否正常", Toast.LENGTH_SHORT).show();
-            mDeviceHandler.postDelayed(checkDeviceRunnable, 2500);
+            mDeviceHandler.postDelayed(checkDeviceRunnable, 3000);
         }
         else
             Toast.makeText(mContext, "裝置異常，請稍等...", Toast.LENGTH_SHORT).show();
@@ -343,10 +343,10 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 //mTxtReceive.setText(mTxtReceive.getText().toString() + "\n" +msg.obj.toString());
                 mDeviceHandler.removeCallbacks(checkDeviceRunnable);
                 if(bDeviceIsAlive)
-                    mDeviceHandler.postDelayed(checkDeviceRunnable, 2500);
+                    mDeviceHandler.postDelayed(checkDeviceRunnable, 3000);
                 else {
                     mDeviceHandler.post(checkDeviceRunnable);
-                    mDeviceHandler.postDelayed(checkDeviceRunnable, 2500);
+                    mDeviceHandler.postDelayed(checkDeviceRunnable, 3000);
                 }
             }else if(msg.arg1 == 3){
                 //mTxtSend.setText(msg.obj.toString());

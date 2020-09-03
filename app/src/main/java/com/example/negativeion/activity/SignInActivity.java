@@ -1,5 +1,6 @@
 package com.example.negativeion.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,10 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.negativeion.Attribute;
@@ -48,17 +49,18 @@ public class SignInActivity extends AppCompatActivity  implements
     private int signInStatusCode = GoogleSignInStatusCodes.SUCCESS;
 
     private GoogleSignInClient mGoogleSignInClient;
-    private TextView mStatusTextView;
     private static ImageView mImageView;
-    private Runnable GetProfileRunable;
+    private ProgressDialog progressDialog;
+
+    private Runnable getProfileRunnable;
 
     private GoogleInfoModel topicGoogleUserData;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
-        mStatusTextView = findViewById(R.id.status);
         mImageView = findViewById(R.id.imageView);
         mImageView.setImageResource(R.drawable.member);
 
@@ -142,7 +144,7 @@ public class SignInActivity extends AppCompatActivity  implements
 
             idToken = account.getIdToken();
             Log.w(TAG,"idToken=" + idToken);
-            new Thread(GetProfileRunable).start();
+            new Thread(getProfileRunnable).start();
             // Signed in successfully, show authenticated UI.
             updateUI(account);
         } catch (ApiException e) {
@@ -174,10 +176,20 @@ public class SignInActivity extends AppCompatActivity  implements
 
     private void updateUI(@Nullable GoogleSignInAccount account) {
         if (account != null) {
+            progressDialog = new ProgressDialog(SignInActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setMessage(this.getString(R.string.signing_in));
+            progressDialog.show();
+            try{
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             Intent intent = new Intent(SignInActivity.this, MainActivity.class);
             intent.putExtra(Attribute.USER_PHOTOURL, account.getPhotoUrl().toString())
                     .putExtra(Attribute.USER_NAME, account.getDisplayName())
                     .putExtra(Attribute.USER_ID, account.getId());
+            progressDialog.dismiss();
             startActivity(intent);
             /*mStatusTextView.setText(getString(R.string.signed_in_fmt, account.getDisplayName()
                             + "\n" + account.getId()));
@@ -245,7 +257,7 @@ public class SignInActivity extends AppCompatActivity  implements
     }
 
     private void initRunnable() {
-        GetProfileRunable = new Runnable() {
+        getProfileRunnable = new Runnable() {
             @Override
             public void run() {
                 OkHttpClient client = new OkHttpClient.Builder()
