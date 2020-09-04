@@ -180,30 +180,20 @@ public class SignInActivity extends AppCompatActivity  implements
             progressDialog.setIndeterminate(true);
             progressDialog.setMessage(this.getString(R.string.signing_in));
             progressDialog.show();
-            try{
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
             Intent intent = new Intent(SignInActivity.this, MainActivity.class);
             intent.putExtra(Attribute.USER_PHOTOURL, account.getPhotoUrl().toString())
                     .putExtra(Attribute.USER_NAME, account.getDisplayName())
                     .putExtra(Attribute.USER_ID, account.getId());
-            progressDialog.dismiss();
-            startActivity(intent);
-            /*mStatusTextView.setText(getString(R.string.signed_in_fmt, account.getDisplayName()
-                            + "\n" + account.getId()));
 
-            startImageTask(account.getPhotoUrl().toString());
-            mImageView.setImageBitmap(getBitmapFromURL(account.getPhotoUrl().toString()));*/
-           /* findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.button_sign_out).setVisibility(View.VISIBLE);*/
+            new Handler().postDelayed(() -> {
+                progressDialog.dismiss();
+                startActivity(intent);
+            }, 500);
         } else {
-            //mStatusTextView.setText(R.string.signed_out);
             mImageView.setImageResource(R.drawable.member);
             if(signInStatusCode == GoogleSignInStatusCodes.NETWORK_ERROR)
                 Toast.makeText(this, "請連上網路", Toast.LENGTH_SHORT).show();
-            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
         }
     }
 
@@ -213,46 +203,6 @@ public class SignInActivity extends AppCompatActivity  implements
             case R.id.sign_in_button:
                 signIn();
                 break;
-        }
-    }
-
-    public static void startImageTask(String photoUri)
-    {
-        //建立一個AsyncTask執行緒進行圖片讀取動作，並帶入圖片連結網址路徑
-        new AsyncTask<String, Void, Bitmap>()
-        {
-            @Override
-            protected Bitmap doInBackground(String... params)
-            {
-                String url = params[0];
-                return getBitmapFromURL(url);
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap result)
-            {
-                mImageView.setImageBitmap (result);
-                super.onPostExecute(result);
-            }
-        }.execute(photoUri);
-
-    }
-    public static Bitmap getBitmapFromURL(String photoUri)
-    {
-        try
-        {
-            URL url = new URL(photoUri);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoInput(true);
-            conn.connect();
-            InputStream isCover = conn.getInputStream();
-            Bitmap bmpCover = BitmapFactory.decodeStream(isCover);
-            isCover.close();
-            return bmpCover;
-        }
-        catch (Exception e)
-        {
-            return null;
         }
     }
 

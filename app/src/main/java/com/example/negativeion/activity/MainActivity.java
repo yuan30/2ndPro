@@ -59,18 +59,8 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle("離開應用")
                 .setMessage("確定離開嗎?")
                 .setCancelable(false)
-                .setPositiveButton("離開", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        moveTaskToBack(true);
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                })
+                .setPositiveButton("離開", (dialog, which) -> moveTaskToBack(true))
+                .setNegativeButton("取消", (dialog, which) -> {})
                 .show();
         //moveTaskToBack(true);
     }

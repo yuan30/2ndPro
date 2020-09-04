@@ -192,90 +192,69 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             builder.setTitle(R.string.modify_relay_name)
                     .setView(v)
                     .setCancelable(false)
-                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            list.set(pos, edtTxtRName.getText().toString());
-                            mRelayRVAdapter.setRelayNameList(list);
-                            mRelayRVAdapter.notifyDataSetChanged();
-                        }
+                    .setPositiveButton(R.string.ok, (dialog, which) -> {
+                        list.set(pos, edtTxtRName.getText().toString());
+                        mRelayRVAdapter.setRelayNameList(list);
+                        mRelayRVAdapter.notifyDataSetChanged();
                     }).show();
         }
     };
 
     void initRunnable(){
-        relayConditionRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mMysqlConnect.getRelayCondition(deviceId);
+        relayConditionRunnable = () -> {
+            mMysqlConnect.getRelayCondition(deviceId);
 
-                mRelayRecyclerView.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
+            mRelayRecyclerView.postDelayed(() -> {
 
-                        try {
-                            List<String> list = mRelayRVAdapter.getRelayList();
-                            String str = mMysqlConnect.getResponse();
-                            //Toast.makeText(mContext, "re:"+list.size()+" str:"+mMysqlConnect.getResponse()+" "+str.length, Toast.LENGTH_SHORT).show();
-                            for(int i=0; i<list.size(); i++) {
-                                String strTemp = ""+str.charAt(i);
-                                list.set(i, strTemp);
-                            }
-                            mRelayRVAdapter.setRelayList(list);
-                            mRelayRVAdapter.notifyDataSetChanged();
-                            //Toast.makeText(mContext, "資料更新成功", Toast.LENGTH_SHORT).show();
-                        }catch (Exception e)
-                        {
-                            Log.d("Device分頁", "ERROR" + e.getMessage());
-                            //Toast.makeText(mContext, "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-
+                try {
+                    List<String> list = mRelayRVAdapter.getRelayList();
+                    String str = mMysqlConnect.getResponse();
+                    //Toast.makeText(mContext, "re:"+list.size()+" str:"+mMysqlConnect.getResponse()+" "+str.length, Toast.LENGTH_SHORT).show();
+                    for(int i=0; i<list.size(); i++) {
+                        String strTemp = ""+str.charAt(i);
+                        list.set(i, strTemp);
                     }
-                },10);
-            }
-        };
-
-        updateRunnable = new Runnable() {
-            @Override
-            public void run() {
-                /*boolean check = mMysqlConnect.init();
-                if(check)
-                    mMysqlConnect.jdbcAddRelay();*/
-                if(mMqttAsyncHelper != null && bDeviceIsAlive)  //Turn ArrayList to Array and then to String.
-                    mMqttAsyncHelper.publishData(Arrays.toString(mRelayRVAdapter.getRelayList().toArray()));
-
-                mMysqlConnect.updateRelay(deviceId);
-
-                mRelayRecyclerView.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //Toast.makeText(mContext, "MAC:"+deviceId, Toast.LENGTH_SHORT).show();
-                        //Log.d("POST Test", "body:" + mMysqlConnect.getResponse());
-                    }
-                },500);
-            }
-        };
-
-        checkDeviceRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if(bDeviceIsAlive) {
-                    //Toast.makeText(mContext, "裝置異常，請稍等...", Toast.LENGTH_LONG).show();
-                    Snackbar.make(mView, "裝置異常，請稍等...", Snackbar.LENGTH_SHORT).show();
-                    bDeviceIsAlive = false;
-                    /*for (int i = 0; i < mRelayRVAdapter.getRelayList().size(); i++)
-                        mRelayRVAdapter.getRelayList().set(i, "0");*/
-                    mRelayRVAdapter.resetItemLayout();
+                    mRelayRVAdapter.setRelayList(list);
                     mRelayRVAdapter.notifyDataSetChanged();
-
-                }else {
-                    //Toast.makeText(mContext, "裝置重連中，請稍等...", Toast.LENGTH_SHORT).show();
-                    Snackbar.make(mView, "裝置重連中，請稍等...", Snackbar.LENGTH_SHORT).show();
-                    bDeviceIsAlive = true;
-                    mRelayRVAdapter.resetItemLayout();
-                    new Thread(relayConditionRunnable).start();
-                    new Thread(updateRunnable).start();
+                    //Toast.makeText(mContext, "資料更新成功", Toast.LENGTH_SHORT).show();
+                }catch (Exception e)
+                {
+                    Log.d("Device分頁", "ERROR" + e.getMessage());
+                    //Toast.makeText(mContext, "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
+
+            },10);
+        };
+
+        updateRunnable = () -> {
+            if(mMqttAsyncHelper != null && bDeviceIsAlive)  //Turn ArrayList to Array and then to String.
+                mMqttAsyncHelper.publishData(Arrays.toString(mRelayRVAdapter.getRelayList().toArray()));
+
+            mMysqlConnect.updateRelay(deviceId);
+
+            /*mRelayRecyclerView.postDelayed(() -> {
+                //Toast.makeText(mContext, "MAC:"+deviceId, Toast.LENGTH_SHORT).show();
+                //Log.d("POST Test", "body:" + mMysqlConnect.getResponse());
+            },500);*/
+        };
+
+        checkDeviceRunnable = () -> {
+            if(bDeviceIsAlive) {
+                //Toast.makeText(mContext, "裝置異常，請稍等...", Toast.LENGTH_LONG).show();
+                Snackbar.make(mView, "裝置異常，請稍等...", Snackbar.LENGTH_SHORT).show();
+                bDeviceIsAlive = false;
+                /*for (int i = 0; i < mRelayRVAdapter.getRelayList().size(); i++)
+                    mRelayRVAdapter.getRelayList().set(i, "0");*/
+                mRelayRVAdapter.resetItemLayout();
+                mRelayRVAdapter.notifyDataSetChanged();
+
+            }else {
+                //Toast.makeText(mContext, "裝置重連中，請稍等...", Toast.LENGTH_SHORT).show();
+                Snackbar.make(mView, "裝置重連中，請稍等...", Snackbar.LENGTH_SHORT).show();
+                bDeviceIsAlive = true;
+                mRelayRVAdapter.resetItemLayout();
+                new Thread(relayConditionRunnable).start();
+                new Thread(updateRunnable).start();
             }
         };
     }

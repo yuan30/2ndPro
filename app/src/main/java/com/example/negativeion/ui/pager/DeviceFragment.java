@@ -2,7 +2,6 @@ package com.example.negativeion.ui.pager;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -98,15 +97,10 @@ public class DeviceFragment extends Fragment {
          */
         mSwipeRefreshLayout = getView().findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        //Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout");
-
-                        // This method performs the actual data-refresh operation.
-                        // The method calls setRefreshing(false) when it's finished.
-                        updateOperation();
-                    }
+                () -> {
+                    // This method performs the actual data-refresh operation.
+                    // The method calls setRefreshing(false) when it's finished.
+                    updateOperation();
                 }
         );
     }
@@ -167,17 +161,14 @@ public class DeviceFragment extends Fragment {
         builder.setTitle(R.string.add_device)
                 .setView(addDeviceView)
                 .setCancelable(false)
-                .setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        deviceName = edtTxtDName.getText().toString();
+                .setPositiveButton(R.string.add, (dialog, which) -> {
+                    deviceName = edtTxtDName.getText().toString();
 
-                        mDeviceRVAdapter.setDeviceName(deviceName);
-                        mDeviceRVAdapter.setDeviceAddr(deviceId);
-                        mDeviceRVAdapter.notifyDataSetChanged();
+                    mDeviceRVAdapter.setDeviceName(deviceName);
+                    mDeviceRVAdapter.setDeviceAddr(deviceId);
+                    mDeviceRVAdapter.notifyDataSetChanged();
 
-                        new Thread(addUserDeviceRunnable).start();
-                    }
+                    new Thread(addUserDeviceRunnable).start();
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
@@ -200,56 +191,41 @@ public class DeviceFragment extends Fragment {
             AlertDialog.Builder Builder = new AlertDialog.Builder(mContext);
             Builder.setTitle(R.string.choice_action)
                     .setCancelable(false)
-                    .setPositiveButton(R.string.delete_device, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    AlertDialog.Builder delBuilder = new AlertDialog.Builder(mContext);
-                                    delBuilder
-                                            .setMessage(R.string.check_once)
+                    .setPositiveButton(R.string.delete_device, (dialog, which) -> {
+                        AlertDialog.Builder delBuilder = new AlertDialog.Builder(mContext);
+                        delBuilder
+                                .setMessage(R.string.check_once)
+                                .setCancelable(false)
+                                .setPositiveButton(R.string.yes, (dialog13, which13) -> {
+                                    AlertDialog.Builder checkBuilder = new AlertDialog.Builder(mContext);
+                                    checkBuilder.setTitle(R.string.ok)
                                             .setCancelable(false)
-                                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    AlertDialog.Builder checkBuilder = new AlertDialog.Builder(mContext);
-                                                    checkBuilder.setTitle(R.string.ok)
-                                                            .setCancelable(false)
-                                                            .setMessage(R.string.check_twice)
-                                                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(DialogInterface dialog, int which) {
-                                                                    new Thread(deleteDeviceRunnable).start();
-                                                                    manualRefresh();
-                                                                }
-                                                            })
-                                                            .setNegativeButton(R.string.cancel, null)
-                                                            .show();
-                                                }
+                                            .setMessage(R.string.check_twice)
+                                            .setPositiveButton(R.string.ok, (dialog12, which12) -> {
+                                                new Thread(deleteDeviceRunnable).start();
+                                                manualRefresh();
                                             })
-                                            .setNeutralButton(R.string.no, null)
+                                            .setNegativeButton(R.string.cancel, null)
                                             .show();
-                                }
-                            })
-                    .setNegativeButton(R.string.modify, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            LayoutInflater inflater = LayoutInflater.from(mContext);
-                            final View v = inflater.inflate(R.layout.dialog_alter_device_n_relay_name, null);
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            final EditText edtTxtRName = v.findViewById(R.id.edtTxtDnRName);
-                            edtTxtRName.setText(mDeviceRVAdapter.getDeviceName(position));
+                                })
+                                .setNeutralButton(R.string.no, null)
+                                .show();
+                    })
+                    .setNegativeButton(R.string.modify, (dialog, which) -> {
+                        LayoutInflater inflater = LayoutInflater.from(mContext);
+                        final View v = inflater.inflate(R.layout.dialog_alter_device_n_relay_name, null);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        final EditText edtTxtRName = v.findViewById(R.id.edtTxtDnRName);
+                        edtTxtRName.setText(mDeviceRVAdapter.getDeviceName(position));
 
-                            builder.setTitle(R.string.modify_device_name)
-                                    .setView(v)
-                                    .setCancelable(false)
-                                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            deviceName =  edtTxtRName.getText().toString();
-                                            new Thread(modeifyDeviceRunnable).start();
-                                            manualRefresh();
-                                        }
-                                    }).show();
-                        }
+                        builder.setTitle(R.string.modify_device_name)
+                                .setView(v)
+                                .setCancelable(false)
+                                .setPositiveButton(R.string.ok, (dialog1, which1) -> {
+                                    deviceName =  edtTxtRName.getText().toString();
+                                    new Thread(modeifyDeviceRunnable).start();
+                                    manualRefresh();
+                                }).show();
                     })
                     .setNeutralButton(R.string.cancel, null)
                     .show();
@@ -261,7 +237,9 @@ public class DeviceFragment extends Fragment {
     private void manualRefresh()
     {
         mSwipeRefreshLayout.setRefreshing(true);
-        updateOperation();
+        new Handler().postDelayed(() -> {
+            updateOperation();
+        }, 200);
     }
 
     private void updateOperation()
@@ -270,54 +248,39 @@ public class DeviceFragment extends Fragment {
     }
 
     void initRunnable(){
-        addUserDeviceRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mMysqlConnect.addUserAndDevice(userId, deviceId, deviceName);
-                deviceId = "";
-            }
+        addUserDeviceRunnable = () -> {
+            mMysqlConnect.addUserAndDevice(userId, deviceId, deviceName);
+            deviceId = "";
         };
 
-        getUserDeviceRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mMysqlConnect.getUserAndDevice(userId);
+        getUserDeviceRunnable = () -> {
+            mMysqlConnect.getUserAndDevice(userId);
 
-                mDeviceRecyclerView.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mDeviceRVAdapter.removeAllDatas();
-                        try {
-                            for (UserAndDeviceModel userAndDeviceModel : mMysqlConnect.getUserAndDeviceModelList()) {
-                                //以位址做判斷，名稱重複沒關係
-                                if (mDeviceRVAdapter.setDeviceAddr(userAndDeviceModel.getDeviceId()))
-                                    mDeviceRVAdapter.setDeviceName(userAndDeviceModel.getDeviceName());
-                            }
-                            mDeviceRVAdapter.notifyDataSetChanged();
-                        }catch (Exception e){Toast.makeText(mContext, "系統目前出錯，請稍後再試", Toast.LENGTH_SHORT).show();
-                            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();}
-
-                        mSwipeRefreshLayout.setRefreshing(false);
+            mDeviceRecyclerView.postDelayed(() -> {
+                mDeviceRVAdapter.removeAllDatas();
+                try {
+                    for (UserAndDeviceModel userAndDeviceModel : mMysqlConnect.getUserAndDeviceModelList()) {
+                        //以位址做判斷，名稱重複沒關係
+                        if (mDeviceRVAdapter.setDeviceAddr(userAndDeviceModel.getDeviceId()))
+                            mDeviceRVAdapter.setDeviceName(userAndDeviceModel.getDeviceName());
                     }
-                },10);
-            }
+                    mDeviceRVAdapter.notifyDataSetChanged();
+                }catch (Exception e){Toast.makeText(mContext, "系統目前出錯，請稍後再試", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();}
+
+                mSwipeRefreshLayout.setRefreshing(false);
+            },10);
         };
 
-        deleteDeviceRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mMysqlConnect.deleteDevice(deviceId);
-                deviceId = "";
-            }
+        deleteDeviceRunnable = () -> {
+            mMysqlConnect.deleteDevice(deviceId);
+            deviceId = "";
         };
 
-        modeifyDeviceRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mMysqlConnect.modifyDeviceName(deviceId, deviceName);
-                deviceId = "";
-            }
+        modeifyDeviceRunnable = () -> {
+            mMysqlConnect.modifyDeviceName(deviceId, deviceName);
+            deviceId = "";
         };
     }
 }

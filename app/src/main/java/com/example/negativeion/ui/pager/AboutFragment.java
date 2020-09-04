@@ -47,13 +47,10 @@ public class AboutFragment extends Fragment {
         mUserImage = view.findViewById(R.id.userImage);
         mUserName = view.findViewById(R.id.userName);
 
-        view.findViewById(R.id.sign_out_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), SignInActivity.class);
-                intent.putExtra("Sign out", true);
-                startActivity(intent);
-            }
+        view.findViewById(R.id.sign_out_button).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SignInActivity.class);
+            intent.putExtra("Sign out", true);
+            startActivity(intent);
         });
 
 
