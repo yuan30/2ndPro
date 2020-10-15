@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">NegativeIon</string>
-    <string name="sign_in_name">智慧農業負離子系統</string>
+    <string name="app_name">Intelligent Control</string>
+    <string name="sign_in_name">IC system</string>
     <string name="hint_device_name">Device name</string>
     <string name="hint_ap_password">Password</string>
     <string name="help_ap_password">Type in WiFi password</string>

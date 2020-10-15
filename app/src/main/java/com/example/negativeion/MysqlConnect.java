@@ -11,6 +11,10 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -21,9 +25,8 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class MysqlConnect {
     private final String TAG = MysqlConnect.class.getSimpleName();
 
-    private String mysql_url = "jdbc:mysql://140.130.35.236:3306/negative_ion"; //192.168.50.50 localhost
-    private String mysql_user = "usblab";
-    private String mysql_password = "usblab603";
+    private String php_url = "https://140.130.35.236/40643230test/php/";
+    private String php_pdo_url = "https://140.130.35.236/40643230test/php/pdo/";
     private String resStr = "";
 
 
@@ -54,7 +57,16 @@ public class MysqlConnect {
 
         client = new OkHttpClient.Builder()
                 .addInterceptor(logging)
+                .hostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        HostnameVerifier hostnameVerifier = HttpsURLConnection
+                                .getDefaultHostnameVerifier();
+                        return  hostnameVerifier.verify("www.usblab.nctu.me", session);
+                    }
+                })
                 .build();
+
     }
 
     public void CONN(){ //連上getDataV2.php，拿到頁面上的資料表的資料
@@ -69,7 +81,7 @@ public class MysqlConnect {
                 .build();
 
         Request request = new Request.Builder()
-                .url("https://www.usblab.nctu.me/40643230test/php/getDataV2.php")
+                .url(php_url + "getDataV2.php")
                 //?index=" + index +"&date=" + date + "&date2=" + date2 + "&time=" + time + "&time2=" + time2)
                 .method("POST", requestBody)//, RequestBody.create(resBodyStr))
                 .build();
@@ -105,7 +117,7 @@ public class MysqlConnect {
     public void connectTemperature(){ //拿到雙溫度感測器的資料
 
         Request request = new Request.Builder()
-                .url("https://www.usblab.nctu.me/40643230test/php/getTEMP.php?index=0")
+                .url(php_url + "getTEMP.php?index=0")
                 .method("GET", null)//, RequestBody.create(resBodyStr))
                 .build();
 
@@ -134,7 +146,7 @@ public class MysqlConnect {
         RequestBody formBody = params.build();
 
         Request request = new Request.Builder()
-                .url("https://www.usblab.nctu.me/40643230test/php/pdo/addUserDeviceTest.php")
+                .url(php_pdo_url + "addUserDeviceTest.php")
                 .method("POST", formBody)
                 .build();
         try {
@@ -152,7 +164,7 @@ public class MysqlConnect {
         RequestBody formBody = params.build();
 
         Request request = new Request.Builder()
-                .url("https://www.usblab.nctu.me/40643230test/php/pdo/addUserDeviceTest.php")
+                .url(php_pdo_url + "addUserDeviceTest.php")
                 .method("POST", formBody)
                 .build();
         try {
@@ -168,7 +180,7 @@ public class MysqlConnect {
         RequestBody formBody = params.build();
 
         Request request = new Request.Builder()
-                .url("https://www.usblab.nctu.me/40643230test/php/pdo/delDevice.php")
+                .url(php_pdo_url + "delDevice.php")
                 .method("POST", formBody)
                 .build();
         try {
@@ -186,10 +198,7 @@ public class MysqlConnect {
         RequestBody formBody = params.build();
 
         Request request = new Request.Builder()
-                //.url("http://www.usblab.nctu.me/40643230test/php/sendRelay.php?id="+ relayId +"&relay="+ relay)
-                //.method("GET", null)
-                //.url("https://www.usblab.nctu.me/40643230test/php/sendRelay.php")
-                .url("https://www.usblab.nctu.me/40643230test/php/pdo/sendRelay.php")
+                .url(php_pdo_url + "sendRelay.php")
                 .method("POST", formBody)
                 .build();
         try {
@@ -206,7 +215,7 @@ public class MysqlConnect {
                 .build();
 
         Request request = new Request.Builder()
-                .url("https://www.usblab.nctu.me/40643230test/php/pdo/getRelayCondition.php")
+                .url(php_pdo_url + "getRelayCondition.php")
                 .method("POST", requestBody)
                 .build();
 
@@ -226,7 +235,7 @@ public class MysqlConnect {
                 .build();
 
         Request request = new Request.Builder()
-                .url("https://www.usblab.nctu.me/40643230test/php/pdo/getUserAndDevice.php")
+                .url(php_pdo_url + "getUserAndDevice.php")
                 .method("POST", requestBody)
                 .build();
 
