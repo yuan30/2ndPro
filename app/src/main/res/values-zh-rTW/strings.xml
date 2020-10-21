@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">智慧控制</string>
-    <string name="sign_in_name">智慧控制系統</string>
+    <string name="app_name">遠端控制</string>
+    <string name="sign_in_name">遠端控制系統</string>
     <string name="hint_device_name">裝置名稱</string>
     <string name="hint_ap_password">密碼</string>
     <string name="help_ap_password">輸入WiFi密碼</string>

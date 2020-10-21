@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Intelligent Control</string>
-    <string name="sign_in_name">IC system</string>
+    <string name="app_name">Remote Control</string>
+    <string name="sign_in_name">RC system</string>
     <string name="hint_device_name">Device name</string>
     <string name="hint_ap_password">Password</string>
     <string name="help_ap_password">Type in WiFi password</string>
@@ -20,7 +20,7 @@
     <string name="check_twice">Are you sure?</string>
 
     <string name="ok">OK</string>
-    <string name="cancel">cancel</string>
+    <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <!-- Sign-in status messages -->
