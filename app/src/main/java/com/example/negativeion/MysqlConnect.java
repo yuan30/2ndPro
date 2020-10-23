@@ -62,7 +62,7 @@ public class MysqlConnect {
                     public boolean verify(String hostname, SSLSession session) {
                         HostnameVerifier hostnameVerifier = HttpsURLConnection
                                 .getDefaultHostnameVerifier();
-                        return  hostnameVerifier.verify("www.usblab.nctu.me", session);
+                        return  hostnameVerifier.verify("usblab.nfu.edu.tw", session);
                     }
                 })
                 .build();

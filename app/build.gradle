@@ -4,11 +4,11 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
     defaultConfig {
-        applicationId "com.example.negativeion"
+        applicationId "com.coolerd.ryan.control"
         minSdkVersion 21
         targetSdkVersion 29
         versionCode getShellCommitNumbers()
-        versionName "0.7.9"
+        versionName "0.7.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
