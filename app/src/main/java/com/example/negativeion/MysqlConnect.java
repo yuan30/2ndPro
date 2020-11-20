@@ -26,7 +26,7 @@ public class MysqlConnect {
     private final String TAG = MysqlConnect.class.getSimpleName();
 
     private String php_url = "https://140.130.35.236/40643230test/php/";
-    private String php_pdo_url = "https://140.130.35.236/40643230test/php/pdo/";
+    private String php_pdo_url = "http://61.58.248.108:8080/";
     private String resStr = "";
 
 
