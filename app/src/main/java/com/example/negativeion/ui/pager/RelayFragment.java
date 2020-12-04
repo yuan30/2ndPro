@@ -3,7 +3,6 @@ package com.example.negativeion.ui.pager;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -50,7 +49,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     private RecyclerView mRelayRecyclerView;
 
     private Handler mDeviceHandler;
-    private Runnable relayConditionRunnable, updateRunnable, checkDeviceRunnable;
+    private Runnable relayConditionRunnable, uploadRelayConditionRunnable, uploadRelayNameRunnable
+            , checkDeviceRunnable, getRelayNameRunnable;
 
     private boolean bDeviceIsAlive = true;
 
@@ -104,11 +104,14 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         new Thread(relayConditionRunnable).start();
         //Snackbar.make(getView(), deviceId, Snackbar.LENGTH_SHORT).show();
         //Toast.makeText(mContext, "更新資料中", Toast.LENGTH_SHORT).show();
-
-        //try {
-        SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
-                getSharedPreferences("negative_relay", MODE_PRIVATE);
-        //}catch (NullPointerException e){//假設為空，就從db上撈繼電器名稱}
+        SharedPreferences appSharedPrefs = null;
+        try {
+        appSharedPrefs = Objects.requireNonNull(getActivity()).
+                getSharedPreferences("negative_relay" + deviceId, MODE_PRIVATE);
+        }catch (NullPointerException e){//假設為空，就從db上撈繼電器名稱
+            new Thread(getRelayNameRunnable).start();
+            Log.d("relay null name", "0");
+        }
         List<String> list = mRelayRVAdapter.getRelayNameList();
         for(int i = 0; i<list.size(); i++){
             list.set(i, appSharedPrefs.getString(Integer.toString(i), "編號00"+i));
@@ -131,7 +134,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         super.onPause();
         //Toast.makeText(mContext, "pause", Toast.LENGTH_SHORT).show();
         SharedPreferences appSharedPrefs = getActivity().
-                getSharedPreferences("negative_relay",MODE_PRIVATE);
+                getSharedPreferences("negative_relay" + deviceId,MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
         prefsEditor.clear();
         List<String> list = mRelayRVAdapter.getRelayNameList();
@@ -152,7 +155,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         stringList.add("0");
         stringList.add("0");
         List<String> nameList = new ArrayList<>();
-        for(int i=0; i<5; i++)
+        for(int i=1; i<=5; i++)
             nameList.add("編號0"+i);
         mRelayRVAdapter.setRelayList(stringList);
         mRelayRVAdapter.setRelayNameList(nameList);
@@ -174,7 +177,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             if(!mRelayRecyclerView.isComputingLayout()) //還在計算布局時，配適器內容不允許變動。
                 mRelayRVAdapter.notifyDataSetChanged();
             //改成在執行緒裡確定裝置沒斷線才上傳 Mqtt，不然斷線時會一並將所有繼電器資料重置。
-            new Thread(updateRunnable).start();
+            new Thread(uploadRelayConditionRunnable).start();
         }
     };
 
@@ -189,6 +192,9 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             edtTxtRName.setText(mRelayRVAdapter.getRelayNameList().get(position));
             final List list = mRelayRVAdapter.getRelayNameList();
             final int pos = position;
+
+            mMysqlConnect.setRelayId(position+1);
+
             builder.setTitle(R.string.modify_relay_name)
                     .setView(v)
                     .setCancelable(false)
@@ -196,6 +202,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                         list.set(pos, edtTxtRName.getText().toString());
                         mRelayRVAdapter.setRelayNameList(list);
                         mRelayRVAdapter.notifyDataSetChanged();
+                        mMysqlConnect.setRelayName(edtTxtRName.getText().toString());
+                        new Thread(uploadRelayConditionRunnable).start();
                     }).show();
         }
     };
@@ -226,16 +234,20 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             },10);
         };
 
-        updateRunnable = () -> {
+        uploadRelayConditionRunnable = () -> {
             if(mMqttAsyncHelper != null && bDeviceIsAlive)  //Turn ArrayList to Array and then to String.
                 mMqttAsyncHelper.publishData(Arrays.toString(mRelayRVAdapter.getRelayList().toArray()));
 
-            mMysqlConnect.updateRelay(deviceId);
+            mMysqlConnect.uploadRelay(deviceId);
 
             /*mRelayRecyclerView.postDelayed(() -> {
                 //Toast.makeText(mContext, "MAC:"+deviceId, Toast.LENGTH_SHORT).show();
                 //Log.d("POST Test", "body:" + mMysqlConnect.getResponse());
             },500);*/
+        };
+
+        uploadRelayNameRunnable = () -> {
+            mMysqlConnect.uploadRelayName(deviceId);
         };
 
         checkDeviceRunnable = () -> {
@@ -254,8 +266,12 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 bDeviceIsAlive = true;
                 mRelayRVAdapter.resetItemLayout();
                 new Thread(relayConditionRunnable).start();
-                new Thread(updateRunnable).start();
+                new Thread(uploadRelayConditionRunnable).start();
             }
+        };
+
+        getRelayNameRunnable = () -> {
+            mMysqlConnect.getRelayName(deviceId);
         };
     }
 
