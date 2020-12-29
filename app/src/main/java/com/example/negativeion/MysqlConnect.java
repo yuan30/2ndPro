@@ -1,6 +1,7 @@
 package com.example.negativeion;
 
 import com.example.negativeion.model.NegativeIonModel;
+import com.example.negativeion.model.RelayNameModel;
 import com.example.negativeion.model.Temperature2Model;
 import com.example.negativeion.model.UserAndDeviceModel;
 import com.google.gson.Gson;
@@ -32,6 +33,7 @@ public class MysqlConnect {
 
     private int relayId;
     private int relay;
+    private String relayName;
     private static int index;
     private static String date = null;
     private static String date2 = null;
@@ -41,6 +43,7 @@ public class MysqlConnect {
     private List<NegativeIonModel> topicDatas = null;
     private List<Temperature2Model> topicTemperatureDatas = null;
     private List<UserAndDeviceModel> topicUserAndDeviceDatas = null;
+    private List<RelayNameModel> topicRelayNameDatas = null;
 
     private OkHttpClient client;
 
@@ -189,7 +192,7 @@ public class MysqlConnect {
         }catch (IOException e){e.printStackTrace(); resStr = "GG";}
     }
 
-    public void updateRelay(String deviceId){//之後由這送電源開跟關去資料庫1
+    public void uploadRelay(String deviceId){//之後由這送電源開跟關去資料庫1
 
         FormBody.Builder params = new FormBody.Builder();
         params.add(Attribute.DEVICE_ID, deviceId);
@@ -199,6 +202,25 @@ public class MysqlConnect {
 
         Request request = new Request.Builder()
                 .url(php_pdo_url + "sendRelay.php")
+                .method("POST", formBody)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            resStr = response.body().string() ;//+ "\n" + response.toString();
+            //String[] c=resStr.split("");
+        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
+    }
+
+    public void uploadRelayName(String deviceId){
+
+        FormBody.Builder params = new FormBody.Builder();
+        params.add(Attribute.DEVICE_ID, deviceId);
+        params.add(Attribute.RELAY_ID, ""+relayId);
+        params.add(Attribute.RELAY_NAME, ""+relayName);
+        RequestBody formBody = params.build();
+
+        Request request = new Request.Builder()
+                .url(php_pdo_url + "uploadRelayName.php")
                 .method("POST", formBody)
                 .build();
         try {
@@ -252,6 +274,30 @@ public class MysqlConnect {
         }catch (IOException e){e.printStackTrace(); resStr = "GG";}
     }
 
+    public void getRelayName(String deviceId){
+
+        RequestBody requestBody =  new FormBody.Builder()
+                .add(Attribute.DEVICE_ID, deviceId)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(php_pdo_url + "getRelayName.php")
+                .method("POST", requestBody)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful())
+                return;
+
+            Gson gson = new Gson();
+            topicRelayNameDatas = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
+                    , new TypeToken<List<RelayNameModel>>(){ }.getType());
+
+            //resStr = response.body().string() ;
+            //System.out.println(response.body().string());
+        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
+    }
+
     public String getResponse(){return resStr;}
 
     public List<NegativeIonModel> getNegativeIonModelList(){return topicDatas;}
@@ -259,6 +305,8 @@ public class MysqlConnect {
     public List<Temperature2Model> getTemperatureModelList(){return topicTemperatureDatas;}
 
     public List<UserAndDeviceModel> getUserAndDeviceModelList(){return topicUserAndDeviceDatas;}
+
+    public List<RelayNameModel> getRelayNameModelList(){return topicRelayNameDatas;}
 
     public void setIndex(int index) {
         MysqlConnect.index = index;
@@ -284,5 +332,9 @@ public class MysqlConnect {
 
     public void setRelay(int relay) {
         this.relay = relay;
+    }
+
+    public void setRelayName(String relayName) {
+        this.relayName = relayName;
     }
 }
