@@ -250,30 +250,6 @@ public class MysqlConnect {
         }catch (IOException e){e.printStackTrace(); resStr = "GG";}
     }
 
-    public void getUserAndDevice(String userId){
-
-        RequestBody requestBody =  new FormBody.Builder()
-                .add(Attribute.USER_ID, userId)
-                .build();
-
-        Request request = new Request.Builder()
-                .url(php_pdo_url + "getUserAndDevice.php")
-                .method("POST", requestBody)
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful())
-                return;
-
-            Gson gson = new Gson();
-            topicUserAndDeviceDatas = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
-                    , new TypeToken<List<UserAndDeviceModel>>(){ }.getType());
-
-            //resStr = response.body().string() ;
-            //System.out.println(response.body().string());
-        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
-    }
-
     public void getRelayName(String deviceId){
 
         RequestBody requestBody =  new FormBody.Builder()
@@ -292,6 +268,28 @@ public class MysqlConnect {
             Gson gson = new Gson();
             topicRelayNameDatas = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
                     , new TypeToken<List<RelayNameModel>>(){ }.getType());
+
+        }catch (IOException e){e.printStackTrace(); resStr = "GG";}
+    }
+
+    public void getUserAndDevice(String userId){
+
+        RequestBody requestBody =  new FormBody.Builder()
+                .add(Attribute.USER_ID, userId)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(php_pdo_url + "getUserAndDevice.php")
+                .method("POST", requestBody)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful())
+                return;
+
+            Gson gson = new Gson();
+            topicUserAndDeviceDatas = gson.fromJson(response.body().string() //此格式形同JsonArray的主體
+                    , new TypeToken<List<UserAndDeviceModel>>(){ }.getType());
 
             //resStr = response.body().string() ;
             //System.out.println(response.body().string());

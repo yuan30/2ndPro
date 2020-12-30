@@ -5,7 +5,7 @@
     tools:context=".ui.pager.RelayFragment">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/srLayout"
+        android:id="@+id/relaySwipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible">

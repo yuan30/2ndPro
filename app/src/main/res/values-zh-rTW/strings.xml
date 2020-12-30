@@ -8,6 +8,7 @@
 
     <string name="add_device">新增裝置</string>
     <string name="add">新增</string>
+    <string name="add_meg">已新增裝置，名稱為預設裝置/n欲更換名稱，請長案裝置。</string>
 
     <string name="choice_action">選擇動作</string>
 
@@ -68,4 +69,5 @@
     <string name="smartconfig_configure_result_failed_port">建立 SmartConfig 任務失敗, smartConfig port 可能被其他執行緒占用</string>
     <string name="smartconfig_configure_result_success">SmartConfig 完成</string>
     <string name="smartconfig_configure_result_success_item">BSSID = %1$s, InetAddress = %2$s</string>
+    <string name="device_default">預設裝置</string>
 </resources>

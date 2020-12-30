@@ -3,6 +3,7 @@ package com.example.negativeion.ui.pager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -12,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +27,12 @@ import com.example.negativeion.activity.RelayActivity;
 import com.example.negativeion.espsmartconfig.v1.SmartConfigActivity;
 import com.example.negativeion.model.UserAndDeviceModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.MODE_PRIVATE;
 
 public class DeviceFragment extends Fragment {
 
@@ -95,7 +99,7 @@ public class DeviceFragment extends Fragment {
          * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
          * performs a swipe-to-refresh gesture.
          */
-        mSwipeRefreshLayout = getView().findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout = getView().findViewById(R.id.deviceSwipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(
                 () -> {
                     // This method performs the actual data-refresh operation.
@@ -115,6 +119,9 @@ public class DeviceFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        deviceName = getString(R.string.device_default);
+        checkSharedPrefs();
     }
 
     @Override
@@ -138,6 +145,15 @@ public class DeviceFragment extends Fragment {
         }
     }
 
+    void checkSharedPrefs() {
+        try {
+            SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
+                    getSharedPreferences("deviceId_raw", MODE_PRIVATE);
+            //addDevice(appSharedPrefs.getString("device", "0"));
+            Snackbar.make(getView(), "RRR", Snackbar.LENGTH_LONG).show();
+        }catch (Exception e){}
+    }
+
     private void addDevice(String deviceIdTemp)
     {
         String str = "";
@@ -147,34 +163,49 @@ public class DeviceFragment extends Fragment {
         final String deviceId = str;
         this.deviceId = deviceId;
 
-        LayoutInflater inflater = LayoutInflater.from(mContext);
+        mDeviceRVAdapter.setDeviceName(deviceName);
+        mDeviceRVAdapter.setDeviceAddr(deviceId);
+        mDeviceRVAdapter.notifyDataSetChanged();
+
+        new Thread(addUserDeviceRunnable).start();
+
         //原本放在上面，按下fab，Dialog設置此View後開啟，會將此View放在主畫面上
         //而想再開一次Dialog會因為，此View已有一個parent，而出錯。
         //解:1.將view放在這，每次新開一個;2.拿到該view的parent，removeView掉該View。
-        View addDeviceView = inflater.inflate(R.layout.dialog_add_device, null);
+        //LayoutInflater inflater = LayoutInflater.from(mContext);
+        //View addDeviceView = inflater.inflate(R.layout.dialog_add_device, null);
 
-        final EditText edtTxtDName = addDeviceView.findViewById(R.id.edtTxtDName);
+        //final EditText edtTxtDName = addDeviceView.findViewById(R.id.edtTxtDName);
         //用MQTT或其他方法接收MAC Addr，在這新增進RVA。
         //mDeviceRVAdapter.setDeviceAddr();
         Toast.makeText(mContext, "MAC:" + deviceIdTemp, Toast.LENGTH_LONG).show();
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(R.string.add_device)
-                .setView(addDeviceView)
+                //.setView(addDeviceView)
+                .setMessage(getString(R.string.add_meg))
                 .setCancelable(false)
                 .setPositiveButton(R.string.add, (dialog, which) -> {
-                    deviceName = edtTxtDName.getText().toString();
+                    //deviceName = edtTxtDName.getText().toString();
 
-                    mDeviceRVAdapter.setDeviceName(deviceName);
+                    /*mDeviceRVAdapter.setDeviceName(deviceName);
                     mDeviceRVAdapter.setDeviceAddr(deviceId);
                     mDeviceRVAdapter.notifyDataSetChanged();
 
-                    new Thread(addUserDeviceRunnable).start();
+                    new Thread(addUserDeviceRunnable).start();*/
                 })
-                .setNegativeButton(R.string.cancel, null)
                 .show();
+        ClearSharedPrefs();
         getActivity().getIntent().putExtra(Attribute.DEVICE_ID, "-1");
     }
 
+    void ClearSharedPrefs() {
+        SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
+                getSharedPreferences(Attribute.SHARED_PREFS_DEVICE_ID_RAW_DATA, MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+        prefsEditor.clear();
+        prefsEditor.apply();
+
+    }
     private DeviceRVAdapter.OnItemClickListener onItemClickListener = new DeviceRVAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {

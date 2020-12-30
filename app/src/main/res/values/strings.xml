@@ -4,10 +4,13 @@
     <string name="hint_device_name">Device name</string>
     <string name="hint_ap_password">Password</string>
     <string name="help_ap_password">Type in WiFi password</string>
+    <string name="device_default">default</string>
 
     <!-- AlertDialog messages -->
     <string name="add_device">Add a new device</string>
     <string name="add">add</string>
+    <string name="add_meg">Already added, named default/nIf you want to modify, press device long./nThanks.。</string>
+
 
     <string name="choice_action">Choice action</string>
 

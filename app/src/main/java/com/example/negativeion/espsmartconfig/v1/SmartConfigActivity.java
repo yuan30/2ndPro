@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -95,7 +96,7 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
 
     @Override
     protected String getEspTouchVersion() {
-        return getString(R.string.smartconfig_about_version, IEsptouchTask.ESPTOUCH_VERSION);
+        return "";//getString(R.string.smartconfig_about_version, IEsptouchTask.ESPTOUCH_VERSION);
     }
 
     private StateResult check() {
@@ -293,7 +294,25 @@ public class SmartConfigActivity extends SmartConfigActivityAbs {
             intent.putExtra(Attribute.DEVICE_ID, sResultBssid);
             setResult(RESULT_OK, intent);
 
+            SharedPreferences appSharedPrefs =
+                    getSharedPreferences(Attribute.SHARED_PREFS_DEVICE_ID_RAW_DATA,MODE_PRIVATE);
+            SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+            prefsEditor.clear();
+            prefsEditor.putString(Attribute.SHARED_PREFS_STRING_DEVICE_RAW, sResultBssid);
+            prefsEditor.apply();
+
             finish();
         }
     };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AlertDialog mResultDialog;
+        mResultDialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.smartconfig_configure_result_success)
+                .setPositiveButton(android.R.string.ok, this.resultRack)
+                .show();
+        mResultDialog.setCanceledOnTouchOutside(false);
+    }
 }

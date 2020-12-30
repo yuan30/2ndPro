@@ -5,18 +5,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHolder> implements CompoundButton.OnCheckedChangeListener
-    ,View.OnLongClickListener{
+    ,View.OnClickListener{
 
 
     private Boolean bIsAlive = true;
@@ -37,7 +37,7 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
     public RelayRVAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_relay_item, parent, false);
         //view.setOnClickListener(this);
-        view.setOnLongClickListener(this);
+        //view.setOnLongClickListener(this);
         ViewHolder viewHolder = new ViewHolder(view);
         view.setTag(viewHolder);
         return viewHolder;
@@ -66,6 +66,9 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
 
         holder.mSwitch.setTag(position);
         holder.mSwitch.setOnCheckedChangeListener(this);
+
+        holder.mImageView3.setTag(position);
+        holder.mImageView3.setOnClickListener(this);
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -77,7 +80,7 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
     }
 
     public interface OnItemClickListener {
-        void onItemLongClick(View view, int position, String string);
+        void onItemClick(View view, int position, String string);
     }
 
     public interface OnCheckedChangeListener{
@@ -93,23 +96,30 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
     }
 
     @Override
-    public boolean onLongClick(View view) {
+    public void onClick(View view) {
         if(mOnItemClickListener != null){
-            mOnItemClickListener.onItemLongClick(view, (int)view.getTag(), mRelayList.get((int)view.getTag()));
+            mOnItemClickListener.onItemClick(view, (int)view.getTag(), mRelayList.get((int)view.getTag()));
         }
-        return false;
     }
+
+    /*@Override
+    public boolean onLongClick(View view) {
+
+        return false;
+    }*/
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout mMainLayout;
         TextView mTextView2;
+        ImageView mImageView3;
         Switch mSwitch;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             mMainLayout = itemView.findViewById(R.id.mainLayout);
             mTextView2 = itemView.findViewById(R.id.textView2);
+            mImageView3 = itemView.findViewById(R.id.imageView3);
             mSwitch = itemView.findViewById(R.id.switch1);
         }
     }

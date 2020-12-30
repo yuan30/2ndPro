@@ -29,6 +29,7 @@ import com.example.negativeion.MqttAsyncHelper;
 import com.example.negativeion.MysqlConnect;
 import com.example.negativeion.R;
 import com.example.negativeion.RelayRVAdapter;
+import com.example.negativeion.model.RelayNameModel;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     private RecyclerView mRelayRecyclerView;
 
     private Handler mDeviceHandler;
-    private Runnable relayConditionRunnable, uploadRelayConditionRunnable, uploadRelayNameRunnable
+    private Runnable getRelayConditionRunnable, uploadRelayConditionRunnable, uploadRelayNameRunnable
             , checkDeviceRunnable, getRelayNameRunnable;
 
     private boolean bDeviceIsAlive = true;
@@ -82,15 +83,8 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         try {
-            deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
 
-            mRelayRecyclerView = getView().findViewById(R.id.rv_relay);
-            mRelayRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-            mRelayRVAdapter = new RelayRVAdapter(mContext);
-            mRelayRVAdapter.setOnItemClickListener(onItemClickListener);
-            mRelayRVAdapter.OnCheckedChangeListener(onCheckedChangeListener);
-            mRelayRecyclerView.setAdapter(mRelayRVAdapter);
+            initView();
             initRelayList();
         }catch (Exception e){
             Toast.makeText(mContext, "bug:"+e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -101,7 +95,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     @Override
     public void onResume() {
         super.onResume();
-        new Thread(relayConditionRunnable).start();
+        new Thread(getRelayConditionRunnable).start();
         //Snackbar.make(getView(), deviceId, Snackbar.LENGTH_SHORT).show();
         //Toast.makeText(mContext, "更新資料中", Toast.LENGTH_SHORT).show();
         setRelayName();
@@ -128,47 +122,29 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             mqttDisconnect();
     }
 
-    private void setRelayName() {
+    private void initView() {
+        deviceId = getActivity().getIntent().getStringExtra(Attribute.DEVICE_ID);
 
-        SharedPreferences appSharedPrefs = checkRelayNameData();
+        mRelayRecyclerView = getView().findViewById(R.id.rv_relay);
+        mRelayRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        List<String> list = mRelayRVAdapter.getRelayNameList();
-        for(int i = 0; i<list.size(); i++){
-            list.set(i, appSharedPrefs.getString(Integer.toString(i), "裝置 "+(i+1)));
-        }
-        mRelayRVAdapter.setRelayNameList(list);
-        mRelayRVAdapter.notifyDataSetChanged();
+        mRelayRVAdapter = new RelayRVAdapter(mContext);
+        mRelayRVAdapter.setOnItemClickListener(onItemClickListener);
+        mRelayRVAdapter.OnCheckedChangeListener(onCheckedChangeListener);
+        mRelayRecyclerView.setAdapter(mRelayRVAdapter);
+        /*
+         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+         * performs a swipe-to-refresh gesture.
+         */
+        mSwipeRefreshLayout = getView().findViewById(R.id.relaySwipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(
+                () -> {
+                    // This method performs the actual data-refresh operation.
+                    // The method calls setRefreshing(false) when it's finished.
+                    updateOperation();
+                }
+        );
     }
-
-    private SharedPreferences checkRelayNameData() {
-        SharedPreferences appSharedPrefs = null;
-        try {
-            appSharedPrefs = getSharedPreferences();
-        }catch (NullPointerException e){//假設為空，就從db上撈繼電器名稱
-            Thread thread = new Thread(getRelayNameRunnable);
-            thread.start();
-            //Log.d("relay null name", "0");
-            try {
-                thread.join();
-            }catch (InterruptedException Ie){}
-            SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
-
-            //mMysqlConnect.getRelayNameModelList();
-
-            prefsEditor.apply();
-        }
-        return appSharedPrefs;
-    }
-
-    private void checkDeviceAlive() {
-        if(bDeviceIsAlive) {
-            Toast.makeText(mContext, "檢查裝置是否正常", Toast.LENGTH_SHORT).show();
-            mDeviceHandler.postDelayed(checkDeviceRunnable, 3000);
-        }
-        else
-            Toast.makeText(mContext, "裝置異常，請稍等...", Toast.LENGTH_SHORT).show();
-    }
-
     private void initRelayList() {
         List<String> stringList = new ArrayList<>();
         stringList.add("0");
@@ -182,6 +158,69 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         mRelayRVAdapter.setRelayList(stringList);
         mRelayRVAdapter.setRelayNameList(nameList);
         mRelayRVAdapter.notifyDataSetChanged();
+    }
+
+    private void setRelayName() {
+
+        SharedPreferences appSharedPrefs = checkRelayNameData();
+
+        List<String> list = mRelayRVAdapter.getRelayNameList();
+        for(int i = 0; i<list.size(); i++){
+            list.set(i, appSharedPrefs.getString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[i]
+                    , "裝置 "+(i+1)));
+        }
+        mRelayRVAdapter.setRelayNameList(list);
+        mRelayRVAdapter.notifyDataSetChanged();
+    }
+
+    private SharedPreferences checkRelayNameData() {
+        SharedPreferences appSharedPrefs = null;
+        appSharedPrefs = getSharedPreferences();
+        boolean HasRelayName = appSharedPrefs.getBoolean(Attribute.SHARED_PREFS_BOOLEAN_RELAY_NAME
+                , false);
+        //try {
+
+        //}catch (NullPointerException e){//假設為空，就從db上撈繼電器名稱
+        if(!HasRelayName) {
+            Snackbar.make(getView(), "RR", Snackbar.LENGTH_SHORT).show();
+            Thread thread = new Thread(getRelayNameRunnable);
+            thread.start();
+            //Log.d("relay null name", "0");
+            try {
+                thread.join();
+            } catch (InterruptedException Ie) {
+            }
+
+            SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+
+            for (RelayNameModel relayNameModel : mMysqlConnect.getRelayNameModelList()) {
+                prefsEditor.putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[0],
+                        relayNameModel.getRelay1Name())
+                        .putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[1],
+                                relayNameModel.getRelay2Name())
+                        .putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[2],
+                                relayNameModel.getRelay3Name())
+                        .putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[3],
+                                relayNameModel.getRelay4Name())
+                        .putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[4],
+                                relayNameModel.getRelay5Name());
+            }
+
+            prefsEditor.putBoolean(Attribute.SHARED_PREFS_BOOLEAN_RELAY_NAME, true);
+            prefsEditor.apply();
+        }
+        //}
+
+        return appSharedPrefs;
+    }
+
+    private void checkDeviceAlive() {
+        if(bDeviceIsAlive) {
+            Toast.makeText(mContext, "檢查裝置是否正常", Toast.LENGTH_SHORT).show();
+            mDeviceHandler.postDelayed(checkDeviceRunnable, 3000);
+        }
+        else
+            Toast.makeText(mContext, "裝置異常，請稍等...", Toast.LENGTH_SHORT).show();
     }
 
     private RelayRVAdapter.OnCheckedChangeListener onCheckedChangeListener = new RelayRVAdapter.OnCheckedChangeListener() {
@@ -205,7 +244,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
 
     private RelayRVAdapter.OnItemClickListener onItemClickListener = new RelayRVAdapter.OnItemClickListener() {
         @Override
-        public void onItemLongClick(View view, int position, String string) {
+        public void onItemClick(View view, int position, String string) {
 
             LayoutInflater inflater = LayoutInflater.from(mContext);
             final View v = inflater.inflate(R.layout.dialog_alter_device_n_relay_name, null);
@@ -230,8 +269,21 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         }
     };
 
+    private void manualRefresh()
+    {
+        mSwipeRefreshLayout.setRefreshing(true);
+        new Handler().postDelayed(() -> {
+            updateOperation();
+        }, 200);
+    }
+
+    private void updateOperation()
+    {
+        new Thread(getRelayConditionRunnable).start();
+    }
+
     void initRunnable(){
-        relayConditionRunnable = () -> {
+        getRelayConditionRunnable = () -> {
             mMysqlConnect.getRelayCondition(deviceId);
 
             mRelayRecyclerView.postDelayed(() -> {
@@ -252,7 +304,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                     Log.d("Device分頁", "ERROR" + e.getMessage());
                     //Toast.makeText(mContext, "資料更新失敗:" + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-
+                mSwipeRefreshLayout.setRefreshing(false);
             },10);
         };
 
@@ -285,7 +337,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                 Snackbar.make(mView, "裝置重連中，請稍等...", Snackbar.LENGTH_SHORT).show();
                 bDeviceIsAlive = true;
                 mRelayRVAdapter.resetItemLayout();
-                new Thread(relayConditionRunnable).start();
+                new Thread(getRelayConditionRunnable).start();
                 new Thread(uploadRelayConditionRunnable).start();
             }
         };
