@@ -7,8 +7,7 @@
     <string name="help_ap_password">輸入WiFi密碼</string>
 
     <string name="add_device">新增裝置</string>
-    <string name="add">新增</string>
-    <string name="add_meg">已新增裝置，名稱為預設裝置/n欲更換名稱，請長案裝置。</string>
+    <string name="add_meg">已新增成功，名稱為預設裝置。\n欲更換名稱，請長按裝置。</string>
 
     <string name="choice_action">選擇動作</string>
 

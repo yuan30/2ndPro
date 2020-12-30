@@ -8,15 +8,14 @@
 
     <!-- AlertDialog messages -->
     <string name="add_device">Add a new device</string>
-    <string name="add">add</string>
-    <string name="add_meg">Already added, named default/nIf you want to modify, press device long./nThanks.。</string>
+    <string name="add_meg">Already added, it named default. \nIf you want to modify it, press device long. \nThanks.</string>
 
 
     <string name="choice_action">Choice action</string>
 
     <string name="modify">Modify</string>
-    <string name="modify_device_name">modify device name</string>
-    <string name="modify_relay_name">modify relay name</string>
+    <string name="modify_device_name">Modifying device\'s name</string>
+    <string name="modify_relay_name">Modifying relay\'s name</string>
 
     <string name="delete_device">Delete</string>
     <string name="check_once">Delete device, yes or no?</string>

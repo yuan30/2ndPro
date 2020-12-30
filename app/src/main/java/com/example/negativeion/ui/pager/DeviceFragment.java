@@ -58,9 +58,7 @@ public class DeviceFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_device, container, false);
         mContext = requireContext();
-
         mMysqlConnect = new MysqlConnect();
-
 
         return view;
     }
@@ -84,7 +82,7 @@ public class DeviceFragment extends Fragment {
         fabAddDevice = getView().findViewById(R.id.fabAddDevice);
         fabAddDevice.setOnClickListener(v -> { //lambda 語法 need java 1.8
             Intent intent = new Intent(mContext, SmartConfigActivity.class);
-            startActivityForResult(intent, Attribute.RECEIVED_DEIVCE_ID_CODE);
+            startActivity(intent);
         });
 
         mDeviceRecyclerView = getView().findViewById(R.id.rv_device);
@@ -129,11 +127,11 @@ public class DeviceFragment extends Fragment {
         super.onPause();
     }
 
-    @Override
+    /*@Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode != Attribute.RECEIVED_DEIVCE_ID_CODE)
+        if(requestCode != Attribute.RECEIVED_DEVICE_ID_CODE)
             return;
 
         switch (resultCode){
@@ -143,15 +141,17 @@ public class DeviceFragment extends Fragment {
                     addDevice(str);
                 break;
         }
-    }
+    }*/
 
-    void checkSharedPrefs() {
+    private void checkSharedPrefs() {
         try {
-            SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
-                    getSharedPreferences("deviceId_raw", MODE_PRIVATE);
-            //addDevice(appSharedPrefs.getString("device", "0"));
-            Snackbar.make(getView(), "RRR", Snackbar.LENGTH_LONG).show();
-        }catch (Exception e){}
+            SharedPreferences appSharedPrefs = getSharedPreferences();
+            String str = appSharedPrefs.
+                    getString(Attribute.SHARED_P_EDITOR_STRING_DEVICE_RAW, "0");
+            if(str.equals("0")) return;
+
+            addDevice(str);
+        }catch (Exception e){Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_LONG).show();}
     }
 
     private void addDevice(String deviceIdTemp)
@@ -178,29 +178,20 @@ public class DeviceFragment extends Fragment {
         //final EditText edtTxtDName = addDeviceView.findViewById(R.id.edtTxtDName);
         //用MQTT或其他方法接收MAC Addr，在這新增進RVA。
         //mDeviceRVAdapter.setDeviceAddr();
-        Toast.makeText(mContext, "MAC:" + deviceIdTemp, Toast.LENGTH_LONG).show();
+
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(R.string.add_device)
                 //.setView(addDeviceView)
                 .setMessage(getString(R.string.add_meg))
                 .setCancelable(false)
-                .setPositiveButton(R.string.add, (dialog, which) -> {
-                    //deviceName = edtTxtDName.getText().toString();
-
-                    /*mDeviceRVAdapter.setDeviceName(deviceName);
-                    mDeviceRVAdapter.setDeviceAddr(deviceId);
-                    mDeviceRVAdapter.notifyDataSetChanged();
-
-                    new Thread(addUserDeviceRunnable).start();*/
-                })
+                .setPositiveButton(R.string.ok, null)
                 .show();
         ClearSharedPrefs();
-        getActivity().getIntent().putExtra(Attribute.DEVICE_ID, "-1");
+        //getActivity().getIntent().putExtra(Attribute.DEVICE_ID, "-1");
     }
 
     void ClearSharedPrefs() {
-        SharedPreferences appSharedPrefs = Objects.requireNonNull(getActivity()).
-                getSharedPreferences(Attribute.SHARED_PREFS_DEVICE_ID_RAW_DATA, MODE_PRIVATE);
+        SharedPreferences appSharedPrefs = getSharedPreferences();
         SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
         prefsEditor.clear();
         prefsEditor.apply();
@@ -212,7 +203,7 @@ public class DeviceFragment extends Fragment {
             Intent intent = new Intent(getActivity(), RelayActivity.class);
             final String deviceId = mDeviceRVAdapter.getDeviceAddr(position);
             intent.putExtra(Attribute.DEVICE_ID, deviceId);
-            //Toast.makeText(mContext, "D_MAC:"+deviceId,Toast.LENGTH_SHORT).show();
+
             startActivity(intent);
         }
 
@@ -253,7 +244,7 @@ public class DeviceFragment extends Fragment {
                                 .setView(v)
                                 .setCancelable(false)
                                 .setPositiveButton(R.string.ok, (dialog1, which1) -> {
-                                    deviceName =  edtTxtRName.getText().toString();
+                                    deviceName = edtTxtRName.getText().toString();
                                     new Thread(modeifyDeviceRunnable).start();
                                     manualRefresh();
                                 }).show();
@@ -270,7 +261,7 @@ public class DeviceFragment extends Fragment {
         mSwipeRefreshLayout.setRefreshing(true);
         new Handler().postDelayed(() -> {
             updateOperation();
-        }, 200);
+        }, 300);
     }
 
     private void updateOperation()
@@ -313,5 +304,10 @@ public class DeviceFragment extends Fragment {
             mMysqlConnect.modifyDeviceName(deviceId, deviceName);
             deviceId = "";
         };
+    }
+
+    private SharedPreferences getSharedPreferences() {
+        return Objects.requireNonNull(getActivity()).
+                getSharedPreferences(Attribute.SHARED_PREFS_DEVICE_ID_RAW_DATA, MODE_PRIVATE);
     }
 }

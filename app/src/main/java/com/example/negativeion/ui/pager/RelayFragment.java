@@ -96,8 +96,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     public void onResume() {
         super.onResume();
         new Thread(getRelayConditionRunnable).start();
-        //Snackbar.make(getView(), deviceId, Snackbar.LENGTH_SHORT).show();
-        //Toast.makeText(mContext, "更新資料中", Toast.LENGTH_SHORT).show();
+
         setRelayName();
 
         mqttConnect();
@@ -166,7 +165,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
 
         List<String> list = mRelayRVAdapter.getRelayNameList();
         for(int i = 0; i<list.size(); i++){
-            list.set(i, appSharedPrefs.getString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[i]
+            list.set(i, appSharedPrefs.getString(Attribute.SHARED_P_EDITOR_STRING_RELAYS_NAME[i]
                     , "裝置 "+(i+1)));
         }
         mRelayRVAdapter.setRelayNameList(list);
@@ -176,16 +175,14 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     private SharedPreferences checkRelayNameData() {
         SharedPreferences appSharedPrefs = null;
         appSharedPrefs = getSharedPreferences();
-        boolean HasRelayName = appSharedPrefs.getBoolean(Attribute.SHARED_PREFS_BOOLEAN_RELAY_NAME
+        boolean HasRelayName = appSharedPrefs.getBoolean(Attribute.SHARED_P_EDITOR_BOOLEAN_RELAY_NAME
                 , false);
-        //try {
 
-        //}catch (NullPointerException e){//假設為空，就從db上撈繼電器名稱
+        //假設為空，就從db上撈繼電器名稱
         if(!HasRelayName) {
-            Snackbar.make(getView(), "RR", Snackbar.LENGTH_SHORT).show();
             Thread thread = new Thread(getRelayNameRunnable);
             thread.start();
-            //Log.d("relay null name", "0");
+
             try {
                 thread.join();
             } catch (InterruptedException Ie) {
@@ -194,22 +191,21 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
 
             for (RelayNameModel relayNameModel : mMysqlConnect.getRelayNameModelList()) {
-                prefsEditor.putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[0],
+                prefsEditor.putString(Attribute.SHARED_P_EDITOR_STRING_RELAYS_NAME[0],
                         relayNameModel.getRelay1Name())
-                        .putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[1],
+                        .putString(Attribute.SHARED_P_EDITOR_STRING_RELAYS_NAME[1],
                                 relayNameModel.getRelay2Name())
-                        .putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[2],
+                        .putString(Attribute.SHARED_P_EDITOR_STRING_RELAYS_NAME[2],
                                 relayNameModel.getRelay3Name())
-                        .putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[3],
+                        .putString(Attribute.SHARED_P_EDITOR_STRING_RELAYS_NAME[3],
                                 relayNameModel.getRelay4Name())
-                        .putString(Attribute.SHARED_PREFS_STRING_RELAYS_NAME[4],
+                        .putString(Attribute.SHARED_P_EDITOR_STRING_RELAYS_NAME[4],
                                 relayNameModel.getRelay5Name());
             }
 
-            prefsEditor.putBoolean(Attribute.SHARED_PREFS_BOOLEAN_RELAY_NAME, true);
+            prefsEditor.putBoolean(Attribute.SHARED_P_EDITOR_BOOLEAN_RELAY_NAME, true);
             prefsEditor.apply();
         }
-        //}
 
         return appSharedPrefs;
     }
@@ -274,7 +270,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
         mSwipeRefreshLayout.setRefreshing(true);
         new Handler().postDelayed(() -> {
             updateOperation();
-        }, 200);
+        }, 300);
     }
 
     private void updateOperation()
@@ -422,7 +418,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
     };
 
     private SharedPreferences getSharedPreferences() {
-        return Objects.requireNonNull(getActivity()).
-                getSharedPreferences("negative_relay" + deviceId, MODE_PRIVATE);
+        return Objects.requireNonNull(getActivity()).getSharedPreferences(
+                Attribute.SHARED_PREFS_RELAY_BASE + deviceId, MODE_PRIVATE);
     }
 }
