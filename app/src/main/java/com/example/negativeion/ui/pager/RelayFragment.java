@@ -15,6 +15,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.os.Message;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -226,7 +229,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             mMysqlConnect.setRelayId(position+1);
             mMysqlConnect.setRelay(relay);
 
-            List list = mRelayRVAdapter.getRelayList();
+            List<String> list = mRelayRVAdapter.getRelayList();
             list.set(position, Integer.toString(relay));
             mRelayRVAdapter.setRelayList(list);
             //在RecycleView準備layout時，不能呼叫。因在onResume有上資料庫取值，更改switch後，再進來這，上傳資料庫(剛好循環)
@@ -247,7 +250,7 @@ public class RelayFragment extends Fragment implements IMqttResponse {
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             final EditText edtTxtRName = v.findViewById(R.id.edtTxtDnRName);
             edtTxtRName.setText(mRelayRVAdapter.getRelayNameList().get(position));
-            final List list = mRelayRVAdapter.getRelayNameList();
+            final List<String> list = mRelayRVAdapter.getRelayNameList();
             final int pos = position;
 
             mMysqlConnect.setRelayId(position+1);
@@ -264,6 +267,13 @@ public class RelayFragment extends Fragment implements IMqttResponse {
                     }).show();
         }
     };
+
+    private SpannableString toUnderlineString(String originalString) {
+        SpannableString SpanStr = new SpannableString(originalString);
+        SpanStr.setSpan(new UnderlineSpan(), 0, originalString.length()
+                , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return SpanStr;
+    }
 
     private void manualRefresh()
     {

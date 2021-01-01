@@ -17,9 +17,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="7sp"
         android:layout_weight="3.25"
-        android:foreground="?attr/selectableItemBackground"
+        android:background="@drawable/underline_dotted"
         android:maxLength="10"
-        android:text="編號00"
         android:textSize="20sp" />
 
     <ImageView

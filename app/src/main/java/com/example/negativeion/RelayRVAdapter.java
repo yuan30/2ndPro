@@ -102,12 +102,6 @@ public class RelayRVAdapter extends RecyclerView.Adapter<RelayRVAdapter.ViewHold
         }
     }
 
-    /*@Override
-    public boolean onLongClick(View view) {
-
-        return false;
-    }*/
-
     class ViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout mMainLayout;
