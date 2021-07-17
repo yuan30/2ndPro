@@ -84,7 +84,7 @@ public class MysqlConnect {
                 .build();
 
         Request request = new Request.Builder()
-                .url(php_url + "getDataV2.php")
+                .url(php_pdo_url + "getDataV2.php")
                 //?index=" + index +"&date=" + date + "&date2=" + date2 + "&time=" + time + "&time2=" + time2)
                 .method("POST", requestBody)//, RequestBody.create(resBodyStr))
                 .build();

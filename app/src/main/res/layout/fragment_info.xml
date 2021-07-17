@@ -15,14 +15,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btn_2tem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="雙溫度"
-                android:visibility="gone" />
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_tem"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -31,7 +23,7 @@
                 android:layout_weight="1"
                 android:text="溫度" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_hum"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
@@ -39,7 +31,7 @@
                 android:layout_weight="1"
                 android:text="濕度" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_neg"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
